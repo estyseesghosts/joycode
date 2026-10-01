@@ -1,0 +1,1 @@
+Run the repository xcodebuild test command from `mem:suggested_commands`; run `git diff --check`; report when files are not integrated into the Xcode target.

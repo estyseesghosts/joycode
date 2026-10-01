@@ -1,0 +1,12 @@
+{
+  "metadata": {
+    "schemaVersion": 1,
+    "release": "v2.0.20",
+    "operation": "server-info",
+    "provenance": "synthetic",
+    "sanitized": true
+  },
+  "payload": {
+    "status": "synthetic-edge-case"
+  }
+}

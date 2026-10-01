@@ -1,0 +1,1 @@
+Keep presentation, application state, and OpenCode transport separated. Prefer native Swift/SwiftUI. Verify OpenCode V2 contracts rather than inventing transport behavior. Keep slices focused and add targeted XCTest coverage.

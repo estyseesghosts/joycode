@@ -1,0 +1,1 @@
+Use `xcodebuild -list -project Joycode.xcodeproj` to inspect targets. Run `xcodebuild test -project Joycode.xcodeproj -scheme Joycode -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO` for tests.

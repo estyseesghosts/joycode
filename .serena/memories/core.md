@@ -1,0 +1,1 @@
+Native macOS Swift/SwiftUI client. OpenCode V2 remains authoritative for service execution, permissions, sessions, and persistence. Source areas: Service, API, Domain, State, App; tests in Tests. Read `mem:conventions` for implementation style and `mem:task_completion` for verification.
