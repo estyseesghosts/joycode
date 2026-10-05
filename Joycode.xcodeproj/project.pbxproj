@@ -1,0 +1,310 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A10000010000000000000001 /* JoycodeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000001 /* JoycodeApp.swift */; };
+		A10000010000000000000002 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000002 /* RootView.swift */; };
+		A10000010000000000000003 /* JoycodeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000003 /* JoycodeTests.swift */; };
+		A10000010000000000000004 /* LiveOptInTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000004 /* LiveOptInTests.swift */; };
+		A10000010000000000000005 /* JoycodeUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000005 /* JoycodeUITests.swift */; };
+		A10000010000000000000006 /* Identifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000006 /* Identifiers.swift */; };
+		A10000010000000000000007 /* ServiceInterfaces.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000007 /* ServiceInterfaces.swift */; };
+		A10000010000000000000008 /* TranscriptAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000008 /* TranscriptAdapter.swift */; };
+		A10000010000000000000009 /* PresentationContracts.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000009 /* PresentationContracts.swift */; };
+		A10000010000000000000010 /* F03ContractsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000010 /* F03ContractsTests.swift */; };
+		A10000010000000000000011 /* HTTPTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000012 /* HTTPTransport.swift */; };
+		A10000010000000000000012 /* LocalPreferencesStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000013 /* LocalPreferencesStore.swift */; };
+		A10000010000000000000013 /* HTTPTransportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000014 /* HTTPTransportTests.swift */; };
+		A10000010000000000000014 /* FixtureSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000015 /* FixtureSupport.swift */; };
+		A10000010000000000000015 /* FixtureSupportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000016 /* FixtureSupportTests.swift */; };
+		A10000010000000000000016 /* LocalPreferencesStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000017 /* LocalPreferencesStoreTests.swift */; };
+		A10000010000000000000017 /* synthetic-server-info.json in Resources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000018 /* synthetic-server-info.json */; };
+		A10000010000000000000032 /* server-info.json in Resources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000033 /* server-info.json */; };
+		A10000010000000000000033 /* server-connected-event.json in Resources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000034 /* server-connected-event.json */; };
+		A10000010000000000000018 /* HTTPRequestBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000019 /* HTTPRequestBuilder.swift */; };
+		A10000010000000000000019 /* EventEnvelope.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000020 /* EventEnvelope.swift */; };
+		A10000010000000000000020 /* SSEParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000021 /* SSEParser.swift */; };
+		A10000010000000000000021 /* URLSessionEventSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000022 /* URLSessionEventSource.swift */; };
+		A10000010000000000000022 /* EventSourceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000023 /* EventSourceTests.swift */; };
+		A10000010000000000000023 /* ServiceRegistration.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000024 /* ServiceRegistration.swift */; };
+		A10000010000000000000024 /* ServerInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000025 /* ServerInfo.swift */; };
+		A10000010000000000000025 /* LocalServiceDiscovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000026 /* LocalServiceDiscovery.swift */; };
+		A10000010000000000000026 /* ServiceRegistrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000027 /* ServiceRegistrationTests.swift */; };
+		A10000010000000000000027 /* ServiceDiscoveryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000028 /* ServiceDiscoveryTests.swift */; };
+		A10000010000000000000028 /* DiagnosticComposition.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000029 /* DiagnosticComposition.swift */; };
+		A10000010000000000000029 /* DiagnosticModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000030 /* DiagnosticModel.swift */; };
+		A10000010000000000000030 /* DiagnosticView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000031 /* DiagnosticView.swift */; };
+		A10000010000000000000031 /* DiagnosticModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000032 /* DiagnosticModelTests.swift */; };
+		A10000010000000000000034 /* ServiceConnectionOwner.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000035 /* ServiceConnectionOwner.swift */; };
+		A10000010000000000000035 /* ConnectionEventOwner.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000036 /* ConnectionEventOwner.swift */; };
+		A10000010000000000000036 /* ConnectionEventOwnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000037 /* ConnectionEventOwnerTests.swift */; };
+		A10000010000000000000037 /* LocationPublicInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000038 /* LocationPublicInfo.swift */; };
+		A10000010000000000000038 /* LocationResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000039 /* LocationResolver.swift */; };
+		A10000010000000000000039 /* ActiveLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000040 /* ActiveLocation.swift */; };
+		A10000010000000000000040 /* ActiveLocationStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000041 /* ActiveLocationStore.swift */; };
+		A10000010000000000000041 /* ProjectPickerModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000042 /* ProjectPickerModel.swift */; };
+		A10000010000000000000042 /* ProjectPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000043 /* ProjectPickerView.swift */; };
+		A10000010000000000000043 /* ProjectComposition.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000044 /* ProjectComposition.swift */; };
+		A10000010000000000000044 /* ProjectPickerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000045 /* ProjectPickerTests.swift */; };
+		A10000010000000000000045 /* SessionDTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000046 /* SessionDTO.swift */; };
+		A10000010000000000000046 /* SessionAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000047 /* SessionAPI.swift */; };
+		A10000010000000000000047 /* SessionSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000048 /* SessionSummary.swift */; };
+		A10000010000000000000048 /* ActiveSessionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000049 /* ActiveSessionStore.swift */; };
+		A10000010000000000000049 /* SessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000050 /* SessionView.swift */; };
+		A10000010000000000000050 /* SessionComposition.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000051 /* SessionComposition.swift */; };
+		A10000010000000000000051 /* SessionStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000052 /* SessionStoreTests.swift */; };
+		A10000010000000000000052 /* SessionRenameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000053 /* SessionRenameView.swift */; };
+		A10000010000000000000053 /* SessionRenameTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000054 /* SessionRenameTests.swift */; };
+		A10000010000000000000054 /* SelectionDTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000055 /* SelectionDTO.swift */; };
+		A10000010000000000000055 /* SelectionAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000056 /* SelectionAPI.swift */; };
+		A10000010000000000000056 /* SelectionSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000057 /* SelectionSummary.swift */; };
+		A10000010000000000000057 /* SelectionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000058 /* SelectionStore.swift */; };
+		A10000010000000000000058 /* SelectionComposition.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000059 /* SelectionComposition.swift */; };
+		A10000010000000000000059 /* SelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000060 /* SelectionView.swift */; };
+		A10000010000000000000060 /* SelectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000061 /* SelectionTests.swift */; };
+		A10000010000000000000061 /* SessionRenameDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000062; };
+		A10000010000000000000062 /* SessionRenameDraftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000063; };
+		A10000010000000000000063 /* SessionListQueryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000064; };
+		B60000010000000000000001 /* PromptAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = B60000110000000000000001; };
+		B60000010000000000000002 /* PromptAPITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B60000110000000000000002; };
+		B60000010000000000000003 /* TranscriptAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = B60000110000000000000003; };
+		B60000010000000000000004 /* TranscriptMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B60000110000000000000004; };
+		B60000010000000000000005 /* TranscriptAPITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B60000110000000000000005; };
+		B60000010000000000000006 /* OfflineUITestComposition.swift in Sources */ = {isa = PBXBuildFile; fileRef = B60000110000000000000006; };
+		B60000010000000000000007 = {isa = PBXBuildFile; fileRef = B60000110000000000000007; };
+		B60000010000000000000008 = {isa = PBXBuildFile; fileRef = B60000110000000000000008; };
+		B60000010000000000000009 = {isa = PBXBuildFile; fileRef = B60000110000000000000009; };
+		B60000010000000000000010 = {isa = PBXBuildFile; fileRef = B60000110000000000000010; };
+		B60000010000000000000011 = {isa = PBXBuildFile; fileRef = B60000110000000000000011; };
+		B60000010000000000000012 = {isa = PBXBuildFile; fileRef = B60000110000000000000012; };
+		B60000010000000000000013 = {isa = PBXBuildFile; fileRef = B60000110000000000000013; };
+		B60000010000000000000014 = {isa = PBXBuildFile; fileRef = B60000110000000000000014; };
+		B60000010000000000000015 = {isa = PBXBuildFile; fileRef = B60000110000000000000015; };
+		B60000010000000000000016 = {isa = PBXBuildFile; fileRef = B60000110000000000000016; };
+		B60000010000000000000017 = {isa = PBXBuildFile; fileRef = B60000110000000000000017; };
+		B60000010000000000000018 = {isa = PBXBuildFile; fileRef = B60000110000000000000018; };
+        B60000010000000000000019 = {isa = PBXBuildFile; fileRef = B60000110000000000000019; };
+        B60000010000000000000020 = {isa = PBXBuildFile; fileRef = B60000110000000000000020; };
+        B60000010000000000000021 = {isa = PBXBuildFile; fileRef = B60000110000000000000021; };
+        B60000010000000000000022 = {isa = PBXBuildFile; fileRef = B60000110000000000000022; };
+        B60000010000000000000023 = {isa = PBXBuildFile; fileRef = B60000110000000000000023; };
+        B60000010000000000000024 = {isa = PBXBuildFile; fileRef = B60000110000000000000024; };
+        B60000010000000000000025 = {isa = PBXBuildFile; fileRef = B60000110000000000000025; };
+        B60000010000000000000026 = {isa = PBXBuildFile; fileRef = B60000110000000000000026; };
+        B60000010000000000000027 = {isa = PBXBuildFile; fileRef = B60000110000000000000027; };
+        B60000010000000000000028 = {isa = PBXBuildFile; fileRef = B60000110000000000000028; };
+        B60000010000000000000029 = {isa = PBXBuildFile; fileRef = B60000110000000000000029; };
+        B60000010000000000000030 = {isa = PBXBuildFile; fileRef = B60000110000000000000030; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		A10000100000000000000001 /* Joycode.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Joycode.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A10000100000000000000002 /* JoycodeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JoycodeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		A10000100000000000000003 /* JoycodeUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JoycodeUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		A10000110000000000000001 /* JoycodeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JoycodeApp.swift; sourceTree = "<group>"; };
+		A10000110000000000000002 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		A10000110000000000000003 /* JoycodeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JoycodeTests.swift; sourceTree = "<group>"; };
+		A10000110000000000000004 /* LiveOptInTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveOptInTests.swift; sourceTree = "<group>"; };
+		A10000110000000000000005 /* JoycodeUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JoycodeUITests.swift; sourceTree = "<group>"; };
+		A10000110000000000000006 /* Identifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Domain/Identity/Identifiers.swift; sourceTree = "<group>"; };
+		A10000110000000000000007 /* ServiceInterfaces.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = API/Interfaces/ServiceInterfaces.swift; sourceTree = "<group>"; };
+		A10000110000000000000008 /* TranscriptAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = State/Contracts/TranscriptAdapter.swift; sourceTree = "<group>"; };
+		A10000110000000000000009 /* PresentationContracts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = State/Contracts/PresentationContracts.swift; sourceTree = "<group>"; };
+		A10000110000000000000010 /* F03ContractsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = F03ContractsTests.swift; sourceTree = "<group>"; };
+		A10000110000000000000011 /* Joycode.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Joycode.xcodeproj; path = Joycode.xcodeproj; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000012 /* HTTPTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = API/HTTP/HTTPTransport.swift; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000013 /* LocalPreferencesStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = State/LocalPreferences/LocalPreferencesStore.swift; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000014 /* HTTPTransportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests/HTTPTransportTests.swift; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000015 /* FixtureSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests/FixtureSupport/FixtureSupport.swift; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000016 /* FixtureSupportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests/Fixtures/Core/FixtureSupportTests.swift; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000017 /* LocalPreferencesStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests/LocalPreferencesStoreTests.swift; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000018 /* synthetic-server-info.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = Tests/Fixtures/Core/synthetic-server-info.json; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000019 /* HTTPRequestBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = API/HTTP/HTTPRequestBuilder.swift; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000020 /* EventEnvelope.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = API/Events/EventEnvelope.swift; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000021 /* SSEParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = API/Events/SSEParser.swift; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000022 /* URLSessionEventSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = API/Events/URLSessionEventSource.swift; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000023 /* EventSourceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests/EventSourceTests.swift; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000024 /* ServiceRegistration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Service/ServiceRegistration.swift; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000025 /* ServerInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Service/ServerInfo.swift; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000026 /* LocalServiceDiscovery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Service/LocalServiceDiscovery.swift; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000027 /* ServiceRegistrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests/ServiceRegistrationTests.swift; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000028 /* ServiceDiscoveryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests/ServiceDiscoveryTests.swift; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000029 /* DiagnosticComposition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App/Composition/DiagnosticComposition.swift; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000030 /* DiagnosticModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Diagnostics/DiagnosticModel.swift; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000031 /* DiagnosticView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Diagnostics/DiagnosticView.swift; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000032 /* DiagnosticModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests/DiagnosticModelTests.swift; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000033 /* server-info.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = Tests/Fixtures/Core/server-info.json; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000034 /* server-connected-event.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = Tests/Fixtures/Core/server-connected-event.json; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000035 /* ServiceConnectionOwner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = State/Connection/ServiceConnectionOwner.swift; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000036 /* ConnectionEventOwner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = State/ConnectionEventOwner/ConnectionEventOwner.swift; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000037 /* ConnectionEventOwnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests/ConnectionEventOwnerTests.swift; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000038 /* LocationPublicInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = API/Location/LocationPublicInfo.swift; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000039 /* LocationResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = API/Location/LocationResolver.swift; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000040 /* ActiveLocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = State/ActiveLocation/ActiveLocation.swift; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000041 /* ActiveLocationStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = State/ActiveLocation/ActiveLocationStore.swift; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000042 /* ProjectPickerModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/ProjectPicker/ProjectPickerModel.swift; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000043 /* ProjectPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/ProjectPicker/ProjectPickerView.swift; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000044 /* ProjectComposition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App/Composition/ProjectComposition.swift; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000045 /* ProjectPickerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests/ProjectPickerTests.swift; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000046 /* SessionDTO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = API/Sessions/SessionDTO.swift; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000047 /* SessionAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = API/Sessions/SessionAPI.swift; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000048 /* SessionSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = State/Sessions/SessionSummary.swift; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000049 /* ActiveSessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = State/Sessions/ActiveSessionStore.swift; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000050 /* SessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Sessions/SessionView.swift; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000051 /* SessionComposition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App/Composition/SessionComposition.swift; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000052 /* SessionStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests/SessionStoreTests.swift; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000053 /* SessionRenameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/SessionManagement/Rename/SessionRenameView.swift; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000054 /* SessionRenameTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests/SessionRenameTests.swift; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000055 /* SelectionDTO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = API/Selection/SelectionDTO.swift; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000056 /* SelectionAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = API/Selection/SelectionAPI.swift; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000057 /* SelectionSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = State/Selection/SelectionSummary.swift; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000058 /* SelectionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = State/Selection/SelectionStore.swift; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000059 /* SelectionComposition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App/Composition/SelectionComposition.swift; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000060 /* SelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Selection/SelectionView.swift; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000061 /* SelectionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests/SelectionTests.swift; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000062 /* SessionRenameDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/SessionManagement/Rename/SessionRenameDraft.swift; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000063 /* SessionRenameDraftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests/SessionRenameDraftTests.swift; sourceTree = SOURCE_ROOT; };
+		A10000110000000000000064 /* SessionListQueryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests/SessionListQueryTests.swift; sourceTree = SOURCE_ROOT; };
+		B60000110000000000000001 /* PromptAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = API/Prompt/PromptAPI.swift; sourceTree = SOURCE_ROOT; };
+		B60000110000000000000002 /* PromptAPITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests/PromptAPITests.swift; sourceTree = SOURCE_ROOT; };
+		B60000110000000000000003 /* TranscriptAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = API/Transcript/TranscriptAPI.swift; sourceTree = SOURCE_ROOT; };
+		B60000110000000000000004 /* TranscriptMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Domain/Transcript/TranscriptMessage.swift; sourceTree = SOURCE_ROOT; };
+		B60000110000000000000005 /* TranscriptAPITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests/TranscriptAPITests.swift; sourceTree = SOURCE_ROOT; };
+		B60000110000000000000006 /* OfflineUITestComposition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App/Composition/OfflineUITestComposition.swift; sourceTree = SOURCE_ROOT; };
+		B60000110000000000000007 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = State/Composer/ComposerStore.swift; sourceTree = SOURCE_ROOT; };
+		B60000110000000000000008 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Composer/ComposerView.swift; sourceTree = SOURCE_ROOT; };
+		B60000110000000000000009 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests/ComposerStoreTests.swift; sourceTree = SOURCE_ROOT; };
+		B60000110000000000000010 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = State/Transcript/TranscriptStore.swift; sourceTree = SOURCE_ROOT; };
+		B60000110000000000000011 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Transcript/TranscriptView.swift; sourceTree = SOURCE_ROOT; };
+		B60000110000000000000012 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests/TranscriptStoreTests.swift; sourceTree = SOURCE_ROOT; };
+		B60000110000000000000013 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App/Composition/ConversationComposition.swift; sourceTree = SOURCE_ROOT; };
+		B60000110000000000000014 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = State/ConnectionEventOwner/ConnectionEventFanout.swift; sourceTree = SOURCE_ROOT; };
+		B60000110000000000000015 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = State/SessionProjection/SessionEventRouter.swift; sourceTree = SOURCE_ROOT; };
+		B60000110000000000000016 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests/ConnectionEventFanoutTests.swift; sourceTree = SOURCE_ROOT; };
+		B60000110000000000000017 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests/SessionEventRouterTests.swift; sourceTree = SOURCE_ROOT; };
+		B60000110000000000000018 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests/TranscriptReconciliationTests.swift; sourceTree = SOURCE_ROOT; };
+        B60000110000000000000019 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = API/Execution/ExecutionAPI.swift; sourceTree = SOURCE_ROOT; };
+        B60000110000000000000020 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests/ExecutionAPITests.swift; sourceTree = SOURCE_ROOT; };
+        B60000110000000000000021 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = State/ExecutionStatus/ExecutionStatusStore.swift; sourceTree = SOURCE_ROOT; };
+        B60000110000000000000022 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests/ExecutionStatusStoreTests.swift; sourceTree = SOURCE_ROOT; };
+        B60000110000000000000023 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/ExecutionStatus/ExecutionStatusView.swift; sourceTree = SOURCE_ROOT; };
+        B60000110000000000000024 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests/ExecutionCompositionTests.swift; sourceTree = SOURCE_ROOT; };
+        B60000110000000000000025 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = API/Permission/PermissionAPI.swift; sourceTree = SOURCE_ROOT; };
+        B60000110000000000000026 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests/PermissionAPITests.swift; sourceTree = SOURCE_ROOT; };
+        B60000110000000000000027 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = State/Permission/PermissionStore.swift; sourceTree = SOURCE_ROOT; };
+        B60000110000000000000028 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests/PermissionStoreTests.swift; sourceTree = SOURCE_ROOT; };
+        B60000110000000000000029 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Permission/PermissionView.swift; sourceTree = SOURCE_ROOT; };
+        B60000110000000000000030 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests/PermissionCompositionTests.swift; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A10000200000000000000001 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+		A10000200000000000000002 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+		A10000200000000000000003 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		A10000300000000000000001 = {isa = PBXGroup; children = (A10000300000000000000002, A10000300000000000000003, A10000300000000000000004, A10000300000000000000005, A10000300000000000000006, A10000300000000000000007, A10000300000000000000008, A10000300000000000000010, A10000110000000000000046, A10000110000000000000047, A10000110000000000000048, A10000110000000000000049, A10000110000000000000006, A10000110000000000000007, A10000110000000000000008, A10000110000000000000009, A10000110000000000000012, A10000110000000000000013, A10000110000000000000014, A10000110000000000000015, A10000110000000000000016, A10000110000000000000017, A10000110000000000000018, A10000110000000000000019, A10000110000000000000020, A10000110000000000000021, A10000110000000000000022, A10000110000000000000033, A10000110000000000000034, A10000110000000000000035, A10000110000000000000055, A10000110000000000000056, A10000110000000000000057, A10000110000000000000058, B60000110000000000000014, B60000110000000000000015); sourceTree = "<group>"; };
+		A10000300000000000000002 /* App */ = {isa = PBXGroup; children = (A10000110000000000000001, A10000110000000000000002, A10000300000000000000009); path = App; sourceTree = "<group>"; };
+		A10000300000000000000003 /* Tests */ = {isa = PBXGroup; children = (
+			A10000110000000000000003, A10000110000000000000004, A10000110000000000000010, A10000110000000000000023, A10000110000000000000027, A10000110000000000000028, A10000110000000000000032, A10000110000000000000045, A10000110000000000000052, A10000110000000000000054, A10000110000000000000061, A10000110000000000000063,
+			A10000110000000000000064,
+			B60000110000000000000002,
+			B60000110000000000000005,
+			B60000110000000000000009, B60000110000000000000012,
+			B60000110000000000000016, B60000110000000000000017, B60000110000000000000018,
+			B60000110000000000000020, B60000110000000000000022, B60000110000000000000024,
+			B60000110000000000000026, B60000110000000000000028, B60000110000000000000030,
+		); path = Tests; sourceTree = "<group>"; };
+		A10000300000000000000004 /* UITests */ = {isa = PBXGroup; children = (A10000110000000000000005); path = UITests; sourceTree = "<group>"; };
+		A10000300000000000000005 /* Products */ = {isa = PBXGroup; children = (A10000100000000000000001, A10000100000000000000002, A10000100000000000000003); name = Products; sourceTree = "<group>"; };
+		A10000300000000000000006 /* Project */ = {isa = PBXGroup; children = (); name = Project; path = .; sourceTree = SOURCE_ROOT; };
+		A10000300000000000000007 /* Supporting */ = {isa = PBXGroup; children = (); name = Supporting; sourceTree = "<group>"; };
+		A10000300000000000000008 /* Service */ = {isa = PBXGroup; children = (A10000110000000000000024, A10000110000000000000025, A10000110000000000000026); path = Service; sourceTree = "<group>"; };
+		A10000300000000000000009 /* Composition */ = {isa = PBXGroup; children = (A10000110000000000000029, A10000110000000000000044, A10000110000000000000051, A10000110000000000000059, B60000110000000000000001, B60000110000000000000003, B60000110000000000000004, B60000110000000000000006, B60000110000000000000007, B60000110000000000000008, B60000110000000000000010, B60000110000000000000011, B60000110000000000000013, B60000110000000000000019, B60000110000000000000021, B60000110000000000000023, B60000110000000000000025, B60000110000000000000027, B60000110000000000000029); path = Composition; sourceTree = "<group>"; };
+		A10000300000000000000010 /* Features */ = {isa = PBXGroup; children = (A10000300000000000000011, A10000300000000000000012, A10000300000000000000013, A10000300000000000000014, A10000300000000000000016); path = Features; sourceTree = "<group>"; };
+		A10000300000000000000011 /* Diagnostics */ = {isa = PBXGroup; children = (A10000110000000000000030, A10000110000000000000031); path = Diagnostics; sourceTree = "<group>"; };
+		A10000300000000000000012 /* ProjectPicker */ = {isa = PBXGroup; children = (A10000110000000000000042, A10000110000000000000043); path = ProjectPicker; sourceTree = "<group>"; };
+		A10000300000000000000013 /* Sessions */ = {isa = PBXGroup; children = (A10000110000000000000050); path = Sessions; sourceTree = "<group>"; };
+		A10000300000000000000014 /* SessionManagement */ = {isa = PBXGroup; children = (A10000300000000000000015); path = SessionManagement; sourceTree = "<group>"; };
+		A10000300000000000000015 /* Rename */ = {isa = PBXGroup; children = (A10000110000000000000053, A10000110000000000000062); path = Rename; sourceTree = "<group>"; };
+		A10000300000000000000016 /* Selection */ = {isa = PBXGroup; children = (A10000110000000000000060); path = Selection; sourceTree = "<group>"; };
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A10000400000000000000001 /* Joycode */ = {isa = PBXNativeTarget; buildConfigurationList = A10000500000000000000001; buildPhases = (A10000200000000000000004, A10000200000000000000001, A10000200000000000000005); buildRules = (); dependencies = (); name = Joycode; productName = Joycode; productReference = A10000100000000000000001; productType = "com.apple.product-type.application"; };
+		A10000400000000000000002 /* JoycodeTests */ = {isa = PBXNativeTarget; buildConfigurationList = A10000500000000000000002; buildPhases = (A10000200000000000000006, A10000200000000000000002, A10000200000000000000007); buildRules = (); dependencies = (A10000600000000000000001); name = JoycodeTests; productName = JoycodeTests; productReference = A10000100000000000000002; productType = "com.apple.product-type.bundle.unit-test"; };
+		A10000400000000000000003 /* JoycodeUITests */ = {isa = PBXNativeTarget; buildConfigurationList = A10000500000000000000003; buildPhases = (A10000200000000000000008, A10000200000000000000003, A10000200000000000000009); buildRules = (); dependencies = (A10000600000000000000002); name = JoycodeUITests; productName = JoycodeUITests; productReference = A10000100000000000000003; productType = "com.apple.product-type.bundle.ui-testing"; };
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A10000700000000000000001 /* Project object */ = {isa = PBXProject; attributes = {LastUpgradeCheck = 2660;}; buildConfigurationList = A10000500000000000000004; compatibilityVersion = "Xcode 16.0"; developmentRegion = en; hasScannedForEncodings = 0; knownRegions = (en); mainGroup = A10000300000000000000001; productRefGroup = A10000300000000000000005; projectDirPath = ""; projectRoot = ""; targets = (A10000400000000000000001, A10000400000000000000002, A10000400000000000000003); };
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A10000200000000000000004 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+		A10000200000000000000006 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (A10000010000000000000017, A10000010000000000000032, A10000010000000000000033); runOnlyForDeploymentPostprocessing = 0; };
+		A10000200000000000000008 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A10000200000000000000005 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (
+			B60000010000000000000001,
+			B60000010000000000000007, B60000010000000000000008, B60000010000000000000010, B60000010000000000000011, B60000010000000000000013,
+			B60000010000000000000014, B60000010000000000000015,
+			B60000010000000000000019, B60000010000000000000021, B60000010000000000000023,
+			B60000010000000000000025, B60000010000000000000027, B60000010000000000000029,
+			B60000010000000000000003, B60000010000000000000004, B60000010000000000000006,
+			A10000010000000000000001, A10000010000000000000002, A10000010000000000000006, A10000010000000000000007, A10000010000000000000008, A10000010000000000000009, A10000010000000000000011, A10000010000000000000012, A10000010000000000000018, A10000010000000000000019, A10000010000000000000020, A10000010000000000000021, A10000010000000000000023, A10000010000000000000024, A10000010000000000000025, A10000010000000000000028, A10000010000000000000029, A10000010000000000000030, A10000010000000000000034, A10000010000000000000035, A10000010000000000000037, A10000010000000000000038, A10000010000000000000039, A10000010000000000000040, A10000010000000000000041, A10000010000000000000042, A10000010000000000000043, A10000010000000000000045, A10000010000000000000046, A10000010000000000000047, A10000010000000000000048, A10000010000000000000049, A10000010000000000000050, A10000010000000000000052, A10000010000000000000054, A10000010000000000000055, A10000010000000000000056, A10000010000000000000057, A10000010000000000000058, A10000010000000000000059, A10000010000000000000061,
+		); runOnlyForDeploymentPostprocessing = 0; };
+		A10000200000000000000007 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (
+			B60000010000000000000002,
+			B60000010000000000000009, B60000010000000000000012,
+			B60000010000000000000016, B60000010000000000000017, B60000010000000000000018,
+			B60000010000000000000020, B60000010000000000000022, B60000010000000000000024,
+			B60000010000000000000026, B60000010000000000000028, B60000010000000000000030,
+			B60000010000000000000005,
+			A10000010000000000000003, A10000010000000000000004, A10000010000000000000010, A10000010000000000000013, A10000010000000000000014, A10000010000000000000015, A10000010000000000000016, A10000010000000000000022, A10000010000000000000026, A10000010000000000000027, A10000010000000000000031, A10000010000000000000036, A10000010000000000000044, A10000010000000000000051, A10000010000000000000053, A10000010000000000000060, A10000010000000000000062,
+			A10000010000000000000063,
+		); runOnlyForDeploymentPostprocessing = 0; };
+		A10000200000000000000009 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A10000010000000000000005); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		A10000600000000000000001 = {isa = PBXTargetDependency; target = A10000400000000000000001; targetProxy = A10000610000000000000001; };
+		A10000600000000000000002 = {isa = PBXTargetDependency; target = A10000400000000000000001; targetProxy = A10000610000000000000002; };
+/* End PBXTargetDependency section */
+
+/* Begin PBXContainerItemProxy section */
+		A10000610000000000000001 = {isa = PBXContainerItemProxy; containerPortal = A10000700000000000000001; proxyType = 1; remoteGlobalIDString = A10000400000000000000001; remoteInfo = Joycode; };
+		A10000610000000000000002 = {isa = PBXContainerItemProxy; containerPortal = A10000700000000000000001; proxyType = 1; remoteGlobalIDString = A10000400000000000000001; remoteInfo = Joycode; };
+/* End PBXContainerItemProxy section */
+
+/* Begin XCBuildConfiguration section */
+		A10000800000000000000001 = {isa = XCBuildConfiguration; buildSettings = {CLANG_ENABLE_MODULES = YES; ENABLE_TESTABILITY = YES; GENERATE_INFOPLIST_FILE = YES; MACOSX_DEPLOYMENT_TARGET = 26.0; PRODUCT_BUNDLE_IDENTIFIER = com.joycode.app; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_VERSION = 6.0; }; name = Debug; };
+		A10000800000000000000002 = {isa = XCBuildConfiguration; buildSettings = {CLANG_ENABLE_MODULES = YES; GENERATE_INFOPLIST_FILE = YES; MACOSX_DEPLOYMENT_TARGET = 26.0; PRODUCT_BUNDLE_IDENTIFIER = com.joycode.tests; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_VERSION = 6.0; TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Joycode.app/Contents/MacOS/Joycode"; BUNDLE_LOADER = "$(TEST_HOST)"; }; name = Debug; };
+		A10000800000000000000003 = {isa = XCBuildConfiguration; buildSettings = {CLANG_ENABLE_MODULES = YES; GENERATE_INFOPLIST_FILE = YES; MACOSX_DEPLOYMENT_TARGET = 26.0; PRODUCT_BUNDLE_IDENTIFIER = com.joycode.uitests; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_VERSION = 6.0; TEST_TARGET_NAME = Joycode; }; name = Debug; };
+		A10000800000000000000004 = {isa = XCBuildConfiguration; buildSettings = {CLANG_ENABLE_MODULES = YES; COPY_PHASE_STRIP = NO; ENABLE_TESTABILITY = YES; GCC_OPTIMIZATION_LEVEL = 0; MACOSX_DEPLOYMENT_TARGET = 26.0; MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE; ONLY_ACTIVE_ARCH = YES; SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)"; SWIFT_OPTIMIZATION_LEVEL = "-Onone"; SWIFT_VERSION = 6.0; }; name = Debug; };
+		A10000800000000000000008 = {isa = XCBuildConfiguration; buildSettings = {CLANG_ENABLE_MODULES = YES; COPY_PHASE_STRIP = YES; ENABLE_TESTABILITY = NO; GCC_OPTIMIZATION_LEVEL = s; MACOSX_DEPLOYMENT_TARGET = 26.0; SWIFT_ACTIVE_COMPILATION_CONDITIONS = "RELEASE $(inherited)"; SWIFT_OPTIMIZATION_LEVEL = "-O"; SWIFT_VERSION = 6.0; }; name = Release; };
+		A10000800000000000000005 = {isa = XCBuildConfiguration; buildSettings = {CLANG_ENABLE_MODULES = YES; GENERATE_INFOPLIST_FILE = YES; MACOSX_DEPLOYMENT_TARGET = 26.0; PRODUCT_BUNDLE_IDENTIFIER = com.joycode.app; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_VERSION = 6.0; }; name = Release; };
+		A10000800000000000000006 = {isa = XCBuildConfiguration; buildSettings = {CLANG_ENABLE_MODULES = YES; GENERATE_INFOPLIST_FILE = YES; MACOSX_DEPLOYMENT_TARGET = 26.0; PRODUCT_BUNDLE_IDENTIFIER = com.joycode.tests; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_VERSION = 6.0; TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Joycode.app/Contents/MacOS/Joycode"; BUNDLE_LOADER = "$(TEST_HOST)"; }; name = Release; };
+		A10000800000000000000007 = {isa = XCBuildConfiguration; buildSettings = {CLANG_ENABLE_MODULES = YES; GENERATE_INFOPLIST_FILE = YES; MACOSX_DEPLOYMENT_TARGET = 26.0; PRODUCT_BUNDLE_IDENTIFIER = com.joycode.uitests; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_VERSION = 6.0; TEST_TARGET_NAME = Joycode; }; name = Release; };
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A10000500000000000000001 = {isa = XCConfigurationList; buildConfigurations = (A10000800000000000000001, A10000800000000000000005); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug; };
+		A10000500000000000000002 = {isa = XCConfigurationList; buildConfigurations = (A10000800000000000000002, A10000800000000000000006); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug; };
+		A10000500000000000000003 = {isa = XCConfigurationList; buildConfigurations = (A10000800000000000000003, A10000800000000000000007); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug; };
+		A10000500000000000000004 = {isa = XCConfigurationList; buildConfigurations = (A10000800000000000000004, A10000800000000000000008); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug; };
+/* End XCConfigurationList section */
+	};
+	rootObject = A10000700000000000000001;
+}

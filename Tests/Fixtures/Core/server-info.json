@@ -1,0 +1,20 @@
+{
+  "metadata": {
+    "captureID": "p0-v2.0.20-server-info-20261001",
+    "operation": "server-info",
+    "provenance": "release-pinned-sanitized-capture",
+    "release": "v2.0.20",
+    "sanitized": true,
+    "schemaVersion": 1
+  },
+  "payload": {
+    "paths": {
+      "tmp": "<SANDBOX_TMP>"
+    },
+    "pid": 0,
+    "urls": [
+      "http://127.0.0.1"
+    ],
+    "version": "2.0.20"
+  }
+}

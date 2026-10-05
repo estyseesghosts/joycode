@@ -1,0 +1,1 @@
+Swift macOS app built with Xcode project `Joycode.xcodeproj`; targets Joycode, JoycodeTests, JoycodeUITests. XCTest-based tests.

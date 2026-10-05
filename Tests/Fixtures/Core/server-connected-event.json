@@ -1,0 +1,15 @@
+{
+  "metadata": {
+    "captureID": "p0-v2.0.20-server-connected-20261001",
+    "operation": "event-server-connected",
+    "provenance": "release-pinned-sanitized-capture",
+    "release": "v2.0.20",
+    "sanitized": true,
+    "schemaVersion": 1
+  },
+  "payload": {
+    "data": {},
+    "id": "evt_<REDACTED_EVENT_ID>",
+    "type": "server.connected"
+  }
+}
