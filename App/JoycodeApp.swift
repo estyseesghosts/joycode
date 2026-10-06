@@ -26,7 +26,7 @@ struct JoycodeApp: App {
     }
 
     var body: some Scene {
-        WindowGroup("Joycode") {
+        Window("Joycode", id: "joycode-main") {
             RootView(model: diagnosticModel, eventOwner: eventOwner, pickerModel: pickerModel, sessionStore: sessionStore, selectionStore: selectionStore, composerStore: composerStore, transcriptStore: transcriptStore, executionStore: executionStore, permissionStore: permissionStore)
         }
         .defaultSize(width: 1000, height: 750)
@@ -64,16 +64,17 @@ struct JoycodeApp: App {
         executionStore: ExecutionStatusStore,
         permissionStore: PermissionStore
     ) {
-        let model = DiagnosticComposition.productionModel()
+        let transport: any HTTPTransport = URLSessionHTTPTransport()
+        let model = DiagnosticComposition.productionModel(transport: transport)
         let eventOwner = ConnectionEventOwner(connectionOwner: model)
-        let location = ProjectComposition.activeLocationStore(connectionOwner: model)
+        let location = ProjectComposition.activeLocationStore(connectionOwner: model, transport: transport)
         let pickerModel = ProjectPickerModel(store: location)
-        let sessionStore = SessionComposition.activeSessionStore(connectionOwner: model, location: location, preferences: ProjectComposition.localPreferencesStore())
-        let selectionStore = SelectionComposition.selectionStore(connectionOwner: model, location: location, sessionStore: sessionStore)
+        let sessionStore = SessionComposition.activeSessionStore(connectionOwner: model, location: location, preferences: ProjectComposition.localPreferencesStore(), transport: transport)
+        let selectionStore = SelectionComposition.selectionStore(connectionOwner: model, location: location, sessionStore: sessionStore, transport: transport)
         return (model, eventOwner, pickerModel, sessionStore, selectionStore,
-                ConversationComposition.composer(connectionOwner: model, sessions: sessionStore, selection: selectionStore),
-                ConversationComposition.transcript(connectionOwner: model, sessions: sessionStore, eventOwner: eventOwner),
-                ConversationComposition.execution(connectionOwner: model, sessions: sessionStore, eventOwner: eventOwner),
-                ConversationComposition.permission(connectionOwner: model, sessions: sessionStore, eventOwner: eventOwner))
+                ConversationComposition.composer(connectionOwner: model, sessions: sessionStore, selection: selectionStore, transport: transport),
+                ConversationComposition.transcript(connectionOwner: model, sessions: sessionStore, eventOwner: eventOwner, transport: transport),
+                ConversationComposition.execution(connectionOwner: model, sessions: sessionStore, eventOwner: eventOwner, transport: transport),
+                ConversationComposition.permission(connectionOwner: model, sessions: sessionStore, eventOwner: eventOwner, transport: transport))
     }
 }

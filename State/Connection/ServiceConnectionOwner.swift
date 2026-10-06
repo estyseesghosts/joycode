@@ -44,6 +44,8 @@ class ServiceConnectionOwner: ObservableObject {
         status = .connecting
         operation = Task { [weak self] in
             guard let self else { return }
+            // Release the finished task only while this attempt still owns the generation.
+            defer { if generation == attempt { operation = nil } }
             do {
                 let result = try await Self.withTimeout(self.timeout) { [discover = self.discover] in
                     try await discover()

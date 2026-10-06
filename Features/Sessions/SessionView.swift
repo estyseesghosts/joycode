@@ -18,6 +18,12 @@ struct SessionView: View {
             case .creationRejected: Text("Session creation was rejected").accessibilityIdentifier("session-status")
             case .creationUnknown: Text("Creation outcome unknown; checking will not duplicate it.").accessibilityIdentifier("session-status"); Button("Check") { store.recoverUnknownCreation() }.accessibilityIdentifier("session-recover")
             }
+            if store.persistenceProblem != nil {
+                HStack(spacing: 6) {
+                    Text("Active now, but not saved for restart.").font(.caption).foregroundStyle(.secondary).accessibilityIdentifier("session-persistence-warning")
+                    if let active = store.activeSession { Button("Save Again") { store.load(active.id) }.font(.caption).accessibilityIdentifier("session-persistence-retry") }
+                }
+            }
             if store.activeSession != nil { SessionRenameView(store: store) }
             if !store.roots.isEmpty {
                 ScrollView {

@@ -1,7 +1,7 @@
 ---
-description: Verifies OpenCode V2 API, event, and service contracts for one focused question
+description: OpenCode Researcher. Verifies OpenCode V2 API, event, and service contracts for one focused question
 mode: subagent
-model: opencode-go/longcat-2.5-preview-free
+model: claude-code/claude-haiku-4-5-20251001
 permissions:
   - action: edit
     resource: "*"

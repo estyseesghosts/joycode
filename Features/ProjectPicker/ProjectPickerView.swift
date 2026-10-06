@@ -25,6 +25,14 @@ struct ProjectPickerView: View {
                 if let directory { Text(directory.path).accessibilityIdentifier("project-picker-location"); Button("Verify") { model.retry() } }
                 chooseButton
             }
+            if let problem = store.persistenceProblem {
+                HStack(spacing: 6) {
+                    Text(problem == .saveFailed ? "Not saved for restart: the folder choice could not be written." : "Not saved for restart: saved preferences could not be read.")
+                        .font(.caption).foregroundStyle(.secondary)
+                        .accessibilityIdentifier("project-picker-persistence-warning")
+                    if case .empty = store.state {} else { Button("Save Again") { model.retry() }.font(.caption).accessibilityIdentifier("project-picker-persistence-retry") }
+                }
+            }
         }
         .padding()
         .accessibilityIdentifier("project-picker")

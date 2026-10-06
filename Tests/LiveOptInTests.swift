@@ -68,7 +68,7 @@ final class LiveOptInTests: XCTestCase {
             throw XCTSkip("Live endpoint must match the separately configured sandbox registration.")
         }
 
-        let model = DiagnosticComposition.productionModel(version: .exact(Self.expectedVersion))
+        let model = DiagnosticComposition.productionModel(version: .exact(Self.expectedVersion), transport: URLSessionHTTPTransport())
         let eventOwner = ConnectionEventOwner(connectionOwner: model)
         let expectsStreamFailure = environment["JOYCODE_LIVE_EXPECT_STREAM_FAILURE"] == "1"
         let readinessSentinel = sandboxRoot.appendingPathComponent("joycode-r02-ready", isDirectory: false)
@@ -108,7 +108,7 @@ final class LiveOptInTests: XCTestCase {
                 reconnected?.fulfill()
             }
         }
-        eventObservation = eventOwner.$latestEventType.sink { eventType in
+        eventObservation = eventOwner.$diagnostics.map(\.latestType).sink { eventType in
             guard eventType == "server.connected" else { return }
             if awaitingReconnect {
                 secondEventMarkerObserved = true

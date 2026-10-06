@@ -2,15 +2,15 @@ import SwiftUI
 
 /// Replaceable presentation seam for the initial application window.
 struct RootView: View {
-    @ObservedObject var model: DiagnosticModel
-    @ObservedObject var eventOwner: ConnectionEventOwner
-    @ObservedObject var pickerModel: ProjectPickerModel
-    @ObservedObject var sessionStore: ActiveSessionStore
-    @ObservedObject var selectionStore: SelectionStore
-    @ObservedObject var composerStore: ComposerStore
-    @ObservedObject var transcriptStore: TranscriptStore
-    @ObservedObject var executionStore: ExecutionStatusStore
-    @ObservedObject var permissionStore: PermissionStore
+    let model: DiagnosticModel
+    let eventOwner: ConnectionEventOwner
+    let pickerModel: ProjectPickerModel
+    let sessionStore: ActiveSessionStore
+    let selectionStore: SelectionStore
+    let composerStore: ComposerStore
+    let transcriptStore: TranscriptStore
+    let executionStore: ExecutionStatusStore
+    let permissionStore: PermissionStore
 
     init(model: DiagnosticModel, eventOwner: ConnectionEventOwner, pickerModel: ProjectPickerModel, sessionStore: ActiveSessionStore, selectionStore: SelectionStore, composerStore: ComposerStore, transcriptStore: TranscriptStore, executionStore: ExecutionStatusStore, permissionStore: PermissionStore) {
         self.model = model
@@ -24,11 +24,11 @@ struct RootView: View {
         self.permissionStore = permissionStore
     }
 
-    init(model: DiagnosticModel, eventOwner: ConnectionEventOwner) {
-        let location = ProjectComposition.activeLocationStore(connectionOwner: model)
-        let sessionStore = SessionComposition.activeSessionStore(connectionOwner: model, location: location, preferences: ProjectComposition.localPreferencesStore())
-        let selection = SelectionComposition.selectionStore(connectionOwner: model, location: location, sessionStore: sessionStore)
-        self.init(model: model, eventOwner: eventOwner, pickerModel: ProjectPickerModel(store: location), sessionStore: sessionStore, selectionStore: selection, composerStore: ConversationComposition.composer(connectionOwner: model, sessions: sessionStore, selection: selection), transcriptStore: ConversationComposition.transcript(connectionOwner: model, sessions: sessionStore, eventOwner: eventOwner), executionStore: ConversationComposition.execution(connectionOwner: model, sessions: sessionStore, eventOwner: eventOwner), permissionStore: ConversationComposition.permission(connectionOwner: model, sessions: sessionStore, eventOwner: eventOwner))
+    init(model: DiagnosticModel, eventOwner: ConnectionEventOwner, transport: any HTTPTransport) {
+        let location = ProjectComposition.activeLocationStore(connectionOwner: model, transport: transport)
+        let sessionStore = SessionComposition.activeSessionStore(connectionOwner: model, location: location, preferences: ProjectComposition.localPreferencesStore(), transport: transport)
+        let selection = SelectionComposition.selectionStore(connectionOwner: model, location: location, sessionStore: sessionStore, transport: transport)
+        self.init(model: model, eventOwner: eventOwner, pickerModel: ProjectPickerModel(store: location), sessionStore: sessionStore, selectionStore: selection, composerStore: ConversationComposition.composer(connectionOwner: model, sessions: sessionStore, selection: selection, transport: transport), transcriptStore: ConversationComposition.transcript(connectionOwner: model, sessions: sessionStore, eventOwner: eventOwner, transport: transport), executionStore: ConversationComposition.execution(connectionOwner: model, sessions: sessionStore, eventOwner: eventOwner, transport: transport), permissionStore: ConversationComposition.permission(connectionOwner: model, sessions: sessionStore, eventOwner: eventOwner, transport: transport))
     }
 
     var body: some View {
@@ -41,7 +41,7 @@ struct RootView: View {
             }
             .frame(minWidth: 230, idealWidth: 280, maxWidth: 340)
             VStack {
-                SelectionView(store: selectionStore, sessionStore: sessionStore, locationStore: pickerModel.store)
+                SelectionView(store: selectionStore)
                 TranscriptView(store: transcriptStore)
                 ExecutionStatusView(store: executionStore)
                 PermissionView(store: permissionStore)
@@ -55,6 +55,7 @@ struct RootView: View {
 }
 
 #Preview {
-    let model = DiagnosticComposition.productionModel()
-    RootView(model: model, eventOwner: ConnectionEventOwner(connectionOwner: model))
+    let transport: any HTTPTransport = URLSessionHTTPTransport()
+    let model = DiagnosticComposition.productionModel(transport: transport)
+    RootView(model: model, eventOwner: ConnectionEventOwner(connectionOwner: model), transport: transport)
 }

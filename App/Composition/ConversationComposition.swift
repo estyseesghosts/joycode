@@ -4,8 +4,8 @@ import Foundation
 /// Application-owned conversation stores. Construction is passive; requests
 /// require an already-discovered connection and a loaded session.
 enum ConversationComposition {
-    @MainActor static func execution(connectionOwner: ServiceConnectionOwner, sessions: ActiveSessionStore, eventOwner: ConnectionEventOwner) -> ExecutionStatusStore {
-        let api = ExecutionAPI(transport: URLSessionHTTPTransport())
+    @MainActor static func execution(connectionOwner: ServiceConnectionOwner, sessions: ActiveSessionStore, eventOwner: ConnectionEventOwner, transport: any HTTPTransport) -> ExecutionStatusStore {
+        let api = ExecutionAPI(transport: transport)
         let store = ExecutionStatusStore(activeSessionID: { [weak sessions] in sessions?.activeSession?.id }, connectionGeneration: { [weak connectionOwner] in connectionOwner?.currentContext?.generation }, loadActive: { @MainActor @Sendable in
             guard let context = connectionOwner.currentContext else { throw ExecutionAPIError.notConnected }
             return try await api.activeSessions(connection: context.connection)
@@ -50,8 +50,8 @@ enum ConversationComposition {
     /// only pending lists and `PermissionReplyOutcome` values. Execution state
     /// is untouched: pending approvals are a separate row, never a `blocked`
     /// inference on the execution store.
-    @MainActor static func permission(connectionOwner: ServiceConnectionOwner, sessions: ActiveSessionStore, eventOwner: ConnectionEventOwner) -> PermissionStore {
-        let api = PermissionAPI(transport: URLSessionHTTPTransport())
+    @MainActor static func permission(connectionOwner: ServiceConnectionOwner, sessions: ActiveSessionStore, eventOwner: ConnectionEventOwner, transport: any HTTPTransport) -> PermissionStore {
+        let api = PermissionAPI(transport: transport)
         let store = PermissionStore(activeSessionID: { [weak sessions] in sessions?.activeSession?.id }, connectionGeneration: { [weak connectionOwner] in connectionOwner?.currentContext?.generation }, load: { @MainActor @Sendable id in
             guard let context = connectionOwner.currentContext else { throw PermissionAPIError.notConnected }
             return try await api.pendingRequests(connection: context.connection, sessionID: id)
@@ -111,8 +111,8 @@ enum ConversationComposition {
         store.contextChanged()
     }
 
-    @MainActor static func composer(connectionOwner: ServiceConnectionOwner, sessions: ActiveSessionStore, selection: SelectionStore) -> ComposerStore {
-        let api = PromptAPI(transport: URLSessionHTTPTransport())
+    @MainActor static func composer(connectionOwner: ServiceConnectionOwner, sessions: ActiveSessionStore, selection: SelectionStore, transport: any HTTPTransport) -> ComposerStore {
+        let api = PromptAPI(transport: transport)
         let store = ComposerStore(context: { [weak sessions, weak selection, weak connectionOwner] in
             ComposerContext(sessionID: sessions?.activeSession?.id,
                             directory: sessions?.activeSession?.directory,
@@ -128,11 +128,14 @@ enum ConversationComposition {
 
     /// The transcript hydrates after the event stream's readiness marker, so
     /// the first snapshot cannot predate the live subscriber registration.
-    @MainActor static func transcript(connectionOwner: ServiceConnectionOwner, sessions: ActiveSessionStore, eventOwner: ConnectionEventOwner) -> TranscriptStore {
-        let api = TranscriptAPI(transport: URLSessionHTTPTransport())
+    @MainActor static func transcript(connectionOwner: ServiceConnectionOwner, sessions: ActiveSessionStore, eventOwner: ConnectionEventOwner, transport: any HTTPTransport) -> TranscriptStore {
+        let api = TranscriptAPI(transport: transport)
         let store = TranscriptStore(activeSessionID: { [weak sessions] in sessions?.activeSession?.id }, connectionGeneration: { [weak connectionOwner] in connectionOwner?.currentContext?.generation }, awaitsEventStream: true, load: { @MainActor @Sendable id, query in
             guard let context = connectionOwner.currentContext else { throw TranscriptAPIError.notConnected }
             return try await api.page(connection: context.connection, sessionID: id, query: query)
+        }, loadMessage: { @MainActor @Sendable id, messageID in
+            guard let context = connectionOwner.currentContext else { throw TranscriptAPIError.notConnected }
+            return try await api.message(connection: context.connection, sessionID: id, messageID: messageID)
         })
         bindTranscript(store, sessions: sessions, connectionOwner: connectionOwner)
         bindTranscriptEvents(store, fanout: eventOwner.fanout)

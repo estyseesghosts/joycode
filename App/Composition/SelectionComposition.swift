@@ -6,9 +6,10 @@ enum SelectionComposition {
     @MainActor static func selectionStore(
         connectionOwner: ServiceConnectionOwner,
         location: any ActiveLocationProviding,
-        sessionStore: ActiveSessionStore
+        sessionStore: ActiveSessionStore,
+        transport: any HTTPTransport
     ) -> SelectionStore {
-        let api = SelectionAPI(transport: URLSessionHTTPTransport())
+        let api = SelectionAPI(transport: transport)
         // Capture the publication generation alongside the connection so an
         // old-context mutation/discovery reply can never confirm current
         // selections after a connection replacement.

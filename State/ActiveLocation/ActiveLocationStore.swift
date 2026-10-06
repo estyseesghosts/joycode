@@ -4,6 +4,7 @@ import Combine
 @MainActor
 final class ActiveLocationStore: ObservableObject {
     @Published private(set) var state: ActiveLocationState = .empty
+    @Published private(set) var persistenceProblem: LocationPersistenceProblem?
     var activeLocation: ResolvedLocation? { if case .resolved(let value) = state { return value }; return nil }
 
     private let preferences: LocalPreferencesStore
@@ -28,11 +29,18 @@ final class ActiveLocationStore: ObservableObject {
     }
 
     func select(_ directory: URL) {
-        if var prefs = try? preferences.load() { prefs.selectedDirectory = directory; try? preferences.save(prefs) }
+        persistSelection(directory)
         beginVerification(directory)
     }
 
     func retry() {
+        if persistenceProblem != nil {
+            switch state {
+            case .selected(let directory), .resolving(let directory), .needsRecovery(.some(let directory), _): persistSelection(directory)
+            case .resolved(let location): persistSelection(location.directory)
+            default: break
+            }
+        }
         switch state {
         case .selected(let directory), .resolving(let directory): beginVerification(directory)
         case .needsRecovery(let directory, _): if let directory { beginVerification(directory) }
@@ -42,8 +50,17 @@ final class ActiveLocationStore: ObservableObject {
 
     func clear() {
         generation &+= 1; operation?.cancel(); operation = nil
-        if var prefs = try? preferences.load() { prefs.selectedDirectory = nil; try? preferences.save(prefs) }
+        persistSelection(nil)
         state = .empty
+    }
+
+    /// Records the outcome of every restart-affecting write. Failure never
+    /// changes `state`; it only sets the warning.
+    private func persistSelection(_ directory: URL?) {
+        var prefs: LocalPreferences
+        do { prefs = try preferences.load() } catch { persistenceProblem = .loadFailed; return }
+        prefs.selectedDirectory = directory
+        do { try preferences.save(prefs); persistenceProblem = nil } catch { persistenceProblem = .saveFailed }
     }
 
     private func beginVerification(_ directory: URL) {

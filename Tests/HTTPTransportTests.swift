@@ -7,6 +7,7 @@ final class HTTPTransportTests: XCTestCase {
         URLProtocolStub.handler = nil
         URLProtocolStub.responseHandler = nil
         URLProtocolStub.requestURLs = []
+        URLProtocolStub.capturedRequests = []
         super.tearDown()
     }
 
@@ -187,11 +188,7 @@ final class HTTPTransportTests: XCTestCase {
     }
 
     func testRedirectPolicyRejectsAllRedirects() {
-        let source = URL(string: "https://example.test/api")!
-        let destination = URL(string: "https://example.test/other")!
-        XCTAssertFalse(HTTPRedirectPolicy.shouldFollow(from: source, to: destination))
-        XCTAssertFalse(HTTPRedirectPolicy.shouldFollow(
-            from: source, to: URL(string: "https://other.test/api")!))
+        XCTAssertFalse(HTTPRedirectPolicy.shouldFollow())
     }
 
     func testRedirectDelegateRejectsCrossOriginRedirect() {
@@ -208,7 +205,7 @@ final class HTTPTransportTests: XCTestCase {
         )!
         var completionRequest: URLRequest?
 
-        RedirectPolicy(initialURL: source).urlSession(
+        RedirectPolicy().urlSession(
             session,
             task: task,
             willPerformHTTPRedirection: response,
@@ -216,6 +213,87 @@ final class HTTPTransportTests: XCTestCase {
         ) { completionRequest = $0 }
 
         XCTAssertNil(completionRequest)
+    }
+
+    func testRedirectResponseMapsToRedirectRejectedWithoutFollowing() async throws {
+        URLProtocolStub.handler = { _ in (302, Data(), ["Location": "http://localhost/root/other"]) }
+        let transport = URLSessionHTTPTransport(urlProtocolClasses: [URLProtocolStub.self])
+        do {
+            _ = try await transport.send(connection: connection(), request: HTTPRequest(method: .get, relativePath: "/api"))
+            XCTFail("expected redirect rejection")
+        } catch let error as HTTPTransportError {
+            XCTAssertEqual(error, .redirectRejected)
+        }
+        XCTAssertEqual(URLProtocolStub.capturedRequests.count, 1)
+    }
+
+    func testSingleSessionServesManySequentialRequests() async throws {
+        URLProtocolStub.handler = { _ in (200, Data("{}".utf8), [:]) }
+        let counter = SessionFactoryCounter()
+        let transport = URLSessionHTTPTransport(
+            urlProtocolClasses: [URLProtocolStub.self],
+            sessionFactory: { configuration, delegate in
+                counter.make(configuration: configuration, delegate: delegate)
+            }
+        )
+        for _ in 0..<120 {
+            let response = try await transport.send(
+                connection: connection(), request: HTTPRequest(method: .get, relativePath: "/api/info"))
+            XCTAssertEqual(response.statusCode, 200)
+        }
+        XCTAssertEqual(counter.currentCount(), 1)
+    }
+
+    func testDistinctConnectionsKeepSeparateAuthorizationHeaders() async throws {
+        URLProtocolStub.handler = { _ in (200, Data(), [:]) }
+        let transport = URLSessionHTTPTransport(urlProtocolClasses: [URLProtocolStub.self])
+        func makeConnection(user: String, password: String, id: String) -> ServiceConnection {
+            ServiceConnection(
+                connectionID: ConnectionID(rawValue: id),
+                endpoint: ServiceEndpoint(baseURL: URL(string: "http://localhost/root")!),
+                credentialCapability: NamedCredentials(username: user, password: password)
+            )
+        }
+        let connectionA = makeConnection(user: "alice", password: "secret-a", id: "a")
+        let connectionB = makeConnection(user: "bob", password: "secret-b", id: "b")
+        _ = try await transport.send(connection: connectionA, request: HTTPRequest(method: .get, relativePath: "/api"))
+        _ = try await transport.send(connection: connectionB, request: HTTPRequest(method: .get, relativePath: "/api"))
+        _ = try await transport.send(connection: connectionA, request: HTTPRequest(method: .get, relativePath: "/api"))
+        let headers = URLProtocolStub.capturedRequests.map { $0.value(forHTTPHeaderField: "Authorization") }
+        XCTAssertEqual(headers.count, 3)
+        let expectedA = "Basic " + Data("alice:secret-a".utf8).base64EncodedString()
+        let expectedB = "Basic " + Data("bob:secret-b".utf8).base64EncodedString()
+        XCTAssertEqual(headers[0], expectedA)
+        XCTAssertEqual(headers[1], expectedB)
+        XCTAssertEqual(headers[2], expectedA)
+        XCTAssertNotEqual(headers[0], headers[1])
+    }
+
+    func testSetCookieIsNotPropagatedAcrossRequests() async throws {
+        URLProtocolStub.handler = { _ in (200, Data(), ["Set-Cookie": "session=abc; Path=/"]) }
+        let transport = URLSessionHTTPTransport(urlProtocolClasses: [URLProtocolStub.self])
+        _ = try await transport.send(connection: connection(), request: HTTPRequest(method: .get, relativePath: "/api/one"))
+        _ = try await transport.send(connection: connection(), request: HTTPRequest(method: .get, relativePath: "/api/two"))
+        XCTAssertEqual(URLProtocolStub.capturedRequests.count, 2)
+        for captured in URLProtocolStub.capturedRequests {
+            XCTAssertNil(captured.value(forHTTPHeaderField: "Cookie"))
+        }
+    }
+
+    func testProductionAPIsHoldInjectedTransportInstance() {
+        let spy = SpyTransport()
+        XCTAssertEqual(ObjectIdentifier(SessionAPI(transport: spy).transport as! SpyTransport), ObjectIdentifier(spy))
+        XCTAssertEqual(ObjectIdentifier(SelectionAPI(transport: spy).transport as! SpyTransport), ObjectIdentifier(spy))
+        XCTAssertEqual(ObjectIdentifier(ExecutionAPI(transport: spy).transport as! SpyTransport), ObjectIdentifier(spy))
+        XCTAssertEqual(ObjectIdentifier(PermissionAPI(transport: spy).transport as! SpyTransport), ObjectIdentifier(spy))
+        XCTAssertEqual(ObjectIdentifier(PromptAPI(transport: spy).transport as! SpyTransport), ObjectIdentifier(spy))
+        XCTAssertEqual(ObjectIdentifier(TranscriptAPI(transport: spy).transport as! SpyTransport), ObjectIdentifier(spy))
+        XCTAssertEqual(ObjectIdentifier(LocationResolver(transport: spy).transport as! SpyTransport), ObjectIdentifier(spy))
+        let discovery = LocalServiceDiscovery(
+            registrationReader: LocalServiceRegistrationReader(fileURL: URL(fileURLWithPath: "/tmp/joycode-h01-nonexistent.json")),
+            transport: spy
+        )
+        XCTAssertEqual(ObjectIdentifier(discovery.transport as! SpyTransport), ObjectIdentifier(spy))
     }
 
     private func connection(baseURL: String = "http://localhost/root") -> ServiceConnection {
@@ -275,14 +353,47 @@ private struct FailingCredentials: CredentialCapability {
     }
 }
 
+private struct NamedCredentials: CredentialCapability {
+    let username: String
+    let password: String
+    var safeDescription: String { "test" }
+    func credential(for connection: ConnectionID) async throws -> ServiceCredential? {
+        ServiceCredential(username: username, password: password)
+    }
+}
+
+private final class SessionFactoryCounter: @unchecked Sendable {
+    private let lock = NSLock()
+    private var count = 0
+    func make(configuration: URLSessionConfiguration, delegate: URLSessionDelegate?) -> URLSession {
+        lock.lock()
+        count += 1
+        lock.unlock()
+        return URLSession(configuration: configuration, delegate: delegate, delegateQueue: nil)
+    }
+    func currentCount() -> Int {
+        lock.lock()
+        defer { lock.unlock() }
+        return count
+    }
+}
+
+private final class SpyTransport: HTTPTransport, @unchecked Sendable {
+    func send(connection: ServiceConnection, request: HTTPRequest) async throws -> HTTPResponse {
+        HTTPResponse(statusCode: 200, headers: [:], body: Data())
+    }
+}
+
 private final class URLProtocolStub: URLProtocol, @unchecked Sendable {
     nonisolated(unsafe) static var handler: ((URLRequest) -> (Int, Data, [String: String])?)?
     nonisolated(unsafe) static var responseHandler: ((URLRequest) -> URLResponse?)?
     nonisolated(unsafe) static var requestURLs: [URL] = []
+    nonisolated(unsafe) static var capturedRequests: [URLRequest] = []
     override class func canInit(with request: URLRequest) -> Bool { true }
     override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
     override func startLoading() {
         if let url = request.url { Self.requestURLs.append(url) }
+        Self.capturedRequests.append(request)
         if let response = Self.responseHandler?(request) {
             client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
             client?.urlProtocol(self, didLoad: Data())
@@ -291,13 +402,11 @@ private final class URLProtocolStub: URLProtocol, @unchecked Sendable {
         }
         guard let result = Self.handler?(request) else { return }
         let response = HTTPURLResponse(url: request.url!, statusCode: result.0, httpVersion: nil, headerFields: result.2)!
-        if (300..<400).contains(result.0), let location = result.2["Location"],
-           let redirectedURL = URL(string: location, relativeTo: request.url)?.absoluteURL {
-            var redirectedRequest = request
-            redirectedRequest.url = redirectedURL
-            client?.urlProtocol(self, wasRedirectedTo: redirectedRequest, redirectResponse: response)
-            return
-        }
+        // Deliver 3xx (including Location) as an ordinary response. The
+        // transport maps any 3xx to redirectRejected and the session delegate
+        // denies any redirect the stack itself attempts. Synthesizing
+        // wasRedirectedTo here would hang inside Foundation regardless of the
+        // delegate decision, so the stub must not use that path.
         client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
         client?.urlProtocol(self, didLoad: result.1)
         client?.urlProtocolDidFinishLoading(self)

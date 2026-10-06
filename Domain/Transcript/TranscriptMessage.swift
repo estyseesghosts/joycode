@@ -131,6 +131,28 @@ private struct TranscriptPageWire: Decodable {
     let cursor: TranscriptCursor
 }
 
+// MARK: - Single-message envelope
+
+extension TranscriptMessage {
+    /// Decodes the `200 {data: Session.Message.Info}` envelope of
+    /// `GET /api/session/{id}/message/{messageID}`. The envelope is strict
+    /// (`data` must be an object); the entry itself follows the page rules:
+    /// known shapes are typed, unknown or malformed variants become opaque.
+    static func decode(envelope data: Data) throws -> TranscriptMessage {
+        do {
+            let wire = try JSONDecoder().decode(TranscriptMessageWire.self, from: data)
+            guard wire.data.objectValue != nil else { throw TranscriptDecodeError.malformed }
+            return TranscriptMessage.from(raw: wire.data)
+        } catch {
+            throw TranscriptDecodeError.malformed
+        }
+    }
+}
+
+private struct TranscriptMessageWire: Decodable {
+    let data: TranscriptJSONValue
+}
+
 // MARK: - Messages
 
 /// A single history record in server order.

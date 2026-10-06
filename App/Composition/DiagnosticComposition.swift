@@ -4,7 +4,7 @@ import Foundation
 /// resolve registration, touch the filesystem, or create a URLSession.
 enum DiagnosticComposition {
     @MainActor
-    static func productionModel(version: ServiceVersionRequirement = .exact("2.0.20")) -> DiagnosticModel {
+    static func productionModel(version: ServiceVersionRequirement = .exact("2.0.20"), transport: any HTTPTransport) -> DiagnosticModel {
         DiagnosticModel(
             discover: {
                 let environment = ProcessInfo.processInfo.environment
@@ -14,7 +14,7 @@ enum DiagnosticComposition {
                 ) else { throw ServiceDiscoveryError.registrationMissing }
                 let discovery = LocalServiceDiscovery(
                     registrationReader: LocalServiceRegistrationReader(fileURL: path),
-                    transport: URLSessionHTTPTransport()
+                    transport: transport
                 )
                 return try await discovery.discover(version: version)
             },

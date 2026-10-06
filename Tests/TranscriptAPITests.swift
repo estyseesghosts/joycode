@@ -508,6 +508,156 @@ final class TranscriptAPITests: XCTestCase {
         }
     }
 
+    // MARK: Single-message read
+
+    private func envelopes(from pageJSON: String) throws -> [(id: String, body: Data)] {
+        let root = try XCTUnwrap(JSONSerialization.jsonObject(with: Data(pageJSON.utf8)) as? [String: Any])
+        let entries = try XCTUnwrap(root["data"] as? [[String: Any]])
+        return try entries.map { entry in
+            (try XCTUnwrap(entry["id"] as? String), try JSONSerialization.data(withJSONObject: ["data": entry]))
+        }
+    }
+
+    private func fetch(_ messageID: String, status: Int = 200, body: Data) async throws -> TranscriptMessage {
+        let transport = TranscriptTestTransport(responses: [(status, body)])
+        return try await TranscriptAPI(transport: transport).message(
+            connection: connection(),
+            sessionID: SessionID(rawValue: "ses-1"),
+            messageID: messageID
+        )
+    }
+
+    func testMessageRequestUsesSessionMessagePathWithoutQuery() {
+        let request = TranscriptAPI.messageRequest(sessionID: SessionID(rawValue: "ses-1"), messageID: "msg_1")
+        XCTAssertEqual(request.method, .get)
+        XCTAssertEqual(request.relativePath, "/api/session/ses-1/message/msg_1")
+        XCTAssertTrue(request.queryItems.isEmpty)
+        XCTAssertNil(request.body)
+    }
+
+    func testMessageRequestPercentEncodesPathSegments() throws {
+        let request = TranscriptAPI.messageRequest(sessionID: SessionID(rawValue: "ses/1"), messageID: "a/b?c#d")
+        XCTAssertEqual(request.relativePath, "/api/session/ses%2F1/message/a%2Fb%3Fc%23d")
+        let url = try HTTPRequestBuilder.makeURL(
+            endpoint: ServiceEndpoint(baseURL: URL(string: "http://localhost")!),
+            request: request
+        )
+        let components = try XCTUnwrap(URLComponents(url: url, resolvingAgainstBaseURL: false))
+        XCTAssertTrue(components.queryItems?.isEmpty ?? true)
+        XCTAssertEqual(components.percentEncodedPath, "/api/session/ses%2F1/message/a%2Fb%3Fc%23d")
+    }
+
+    func testMessageSendsExactRequestAndDecodesSuccessEnvelope() async throws {
+        let body = Data(#"{"data":{"id":"msg_1","type":"user","time":{"created":1700000000},"text":"hi"}}"#.utf8)
+        let transport = TranscriptTestTransport(responses: [(200, body)])
+        let message = try await TranscriptAPI(transport: transport).message(
+            connection: connection(),
+            sessionID: SessionID(rawValue: "ses-9"),
+            messageID: "msg_1"
+        )
+        guard case .user(let user) = message else { return XCTFail("expected user") }
+        XCTAssertEqual(user, TranscriptTextMessage(id: "msg_1", created: 1700000000, text: "hi"))
+        let requests = await transport.requests
+        XCTAssertEqual(requests.count, 1)
+        XCTAssertEqual(requests[0].method, .get)
+        XCTAssertEqual(requests[0].relativePath, "/api/session/ses-9/message/msg_1")
+        XCTAssertTrue(requests[0].queryItems.isEmpty)
+    }
+
+    func testEverySupportedVariantDecodesThroughSingleMessagePathLikePage() async throws {
+        var covered = Set<String>()
+        for json in [mixedHistoryJSON, variantsJSON, toolStatesJSON] {
+            let page = try TranscriptPage.decode(Data(json.utf8))
+            let wrapped = try envelopes(from: json)
+            XCTAssertEqual(wrapped.count, page.messages.count)
+            for (index, entry) in wrapped.enumerated() {
+                let message = try await fetch(entry.id, body: entry.body)
+                XCTAssertEqual(message, page.messages[index], "single read must match page decode for \(entry.id)")
+                covered.insert(message.kind)
+            }
+        }
+        XCTAssertEqual(
+            covered,
+            ["user", "system", "synthetic", "skill", "assistant", "agent-switched", "model-switched",
+             "location-switched", "shell", "compaction", "idle"]
+        )
+    }
+
+    func testSingleMessageUnknownVariantIsSafeOpaque() async throws {
+        let body = Data(#"{"data":{"id":"msg_x","type":"future-widget","time":{"created":1},"fancy":"fancy-payload-sentinel"}}"#.utf8)
+        let message = try await fetch("msg_x", body: body)
+        guard case .opaque(let opaque) = message else { return XCTFail("expected opaque") }
+        XCTAssertEqual(opaque.id, "msg_x")
+        XCTAssertEqual(opaque.kind, "future-widget")
+        XCTAssertFalse(String(describing: message).contains("fancy-payload-sentinel"))
+    }
+
+    func testSingleMessageMalformedEnvelopeMapsToMalformedResponse() async {
+        for body in ["not-json", "{}", #"{"data":null}"#, #"{"data":[]}"#, #"{"data":"msg_1"}"#,
+                     #"{"data":{"id":"msg_1","type":"user","time":{"created":1},"text":"a"},"#] {
+            do {
+                _ = try await fetch("msg_1", body: Data(body.utf8))
+                XCTFail("expected malformedResponse for \(body)")
+            } catch let error as TranscriptAPIError {
+                XCTAssertEqual(error, .malformedResponse, body)
+            } catch {
+                XCTFail("unexpected error \(error)")
+            }
+        }
+    }
+
+    func testSingleMessageWrongOrMissingIDIsRejected() async {
+        for body in [
+            #"{"data":{"id":"msg_other","type":"user","time":{"created":1},"text":"a"}}"#,
+            #"{"data":{"type":"user","time":{"created":1},"text":"a"}}"#
+        ] {
+            do {
+                _ = try await fetch("msg_1", body: Data(body.utf8))
+                XCTFail("expected rejection for \(body)")
+            } catch let error as TranscriptAPIError {
+                XCTAssertEqual(error, .malformedResponse)
+            } catch {
+                XCTFail("unexpected error \(error)")
+            }
+        }
+    }
+
+    func testSingleMessageStatusMappingKeepsNotFoundDistinct() async {
+        let notFound = Data(#"{"_tag":"MessageNotFoundError","sessionID":"ses-1","messageID":"msg_1","message":"m"}"#.utf8)
+        for (status, expected) in [
+            (400, TranscriptAPIError.backend(statusCode: 400)),
+            (401, TranscriptAPIError.unauthorized),
+            (404, TranscriptAPIError.notFound),
+            (500, TranscriptAPIError.backend(statusCode: 500))
+        ] {
+            do {
+                _ = try await fetch("msg_1", status: status, body: notFound)
+                XCTFail("expected error for status \(status)")
+            } catch let error as TranscriptAPIError {
+                XCTAssertEqual(error, expected)
+                XCTAssertNotEqual(error, .malformedResponse)
+            } catch {
+                XCTFail("unexpected error \(error)")
+            }
+        }
+    }
+
+    func testSingleMessageCancellationPropagates() async {
+        let transport = TranscriptTestTransport(responses: [], failure: CancellationError())
+        do {
+            _ = try await TranscriptAPI(transport: transport).message(
+                connection: connection(),
+                sessionID: SessionID(rawValue: "ses-1"),
+                messageID: "msg_1"
+            )
+            XCTFail("expected cancellation")
+        } catch is CancellationError {
+            // Expected.
+        } catch {
+            XCTFail("unexpected error \(error)")
+        }
+    }
+
     // MARK: Payload safety
 
     func testDescriptionsNeverRenderPayloadBytes() throws {

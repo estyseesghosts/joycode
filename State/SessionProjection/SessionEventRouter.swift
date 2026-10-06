@@ -84,6 +84,21 @@ enum SessionEventRouter {
         }
     }
 
+    /// Narrow H06 classifier for the transcript live path. Families covered
+    /// by `SessionTranscriptEventDecoder`/`TranscriptLiveReducer` (the
+    /// assistant step/text/reasoning/tool lifecycle) are `.ignored` here:
+    /// they project locally and must not trigger snapshot invalidation.
+    /// Every other envelope returns exactly what `route(_:)` returns
+    /// (deletion, revert, unknown `session.*` families, other structural rows
+    /// such as shell/compaction/synthetic/instructions, unroutable). This is
+    /// not wired into the store until H08; `route(_:)` keeps its behavior.
+    static func structuralRoute(_ envelope: EventEnvelope) -> SessionEventRoute {
+        if SessionTranscriptEventDecoder.coveredTypes.contains(envelope.type) {
+            return .ignored
+        }
+        return route(envelope)
+    }
+
     private static func sessionID(in data: EventJSONValue) -> SessionID? {
         guard let raw = data.objectValue?["sessionID"]?.stringValue, !raw.isEmpty else { return nil }
         return SessionID(rawValue: raw)

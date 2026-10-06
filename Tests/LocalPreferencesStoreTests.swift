@@ -104,3 +104,18 @@ final class LocalPreferencesStoreTests: XCTestCase {
         case injected
     }
 }
+
+extension LocalPreferencesStoreTests {
+    func testFailedSaveKeepsBothFieldsAndLaterSaveSucceeds() throws {
+        let fileURL = directory.appendingPathComponent("local-preferences.json")
+        let old = LocalPreferences(selectedDirectory: URL(fileURLWithPath: "/tmp/old"), lastSessionID: SessionID(rawValue: "ses-old"))
+        try LocalPreferencesStore(fileURL: fileURL).save(old)
+        let failing = LocalPreferencesStore(fileURL: fileURL) { _, _ in throw CocoaError(.fileWriteUnknown) }
+        XCTAssertThrowsError(try failing.save(LocalPreferences(selectedDirectory: nil, lastSessionID: nil)))
+        XCTAssertEqual(try LocalPreferencesStore(fileURL: fileURL).load(), old)
+
+        let updated = LocalPreferences(selectedDirectory: nil, lastSessionID: nil)
+        try LocalPreferencesStore(fileURL: fileURL).save(updated)
+        XCTAssertEqual(try LocalPreferencesStore(fileURL: fileURL).load(), updated)
+    }
+}

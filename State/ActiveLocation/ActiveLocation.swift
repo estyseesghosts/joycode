@@ -17,6 +17,12 @@ enum ActiveLocationProblem: Equatable, Sendable {
     case directoryMissing, notADirectory, directoryInaccessible, notConnected, unauthorized, requestFailed, malformedResponse, preferencesUnreadable
 }
 
+/// Non-blocking warning that the chosen folder was not durably saved. It is
+/// overlay state: the running selection stays usable regardless.
+enum LocationPersistenceProblem: Equatable, Sendable {
+    case loadFailed, saveFailed
+}
+
 enum ActiveLocationState: Equatable, Sendable {
     case empty
     case selected(directory: URL)

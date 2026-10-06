@@ -4,8 +4,9 @@ import XCTest
 final class JoycodeTests: XCTestCase {
     @MainActor
     func testRootViewCanBeConstructedWithoutAService() {
-        let model = DiagnosticComposition.productionModel()
-        let view = RootView(model: model, eventOwner: ConnectionEventOwner(connectionOwner: model))
+        let transport: any HTTPTransport = URLSessionHTTPTransport()
+        let model = DiagnosticComposition.productionModel(transport: transport)
+        let view = RootView(model: model, eventOwner: ConnectionEventOwner(connectionOwner: model), transport: transport)
 
         XCTAssertNotNil(view)
     }

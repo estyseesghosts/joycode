@@ -779,3 +779,96 @@ private struct TestCredentials: CredentialCapability {
     var safeDescription: String { "test" }
     func credential(for connection: ConnectionID) async throws -> ServiceCredential? { nil }
 }
+
+private final class SessionPersistFailSwitch: @unchecked Sendable {
+    private let lock = NSLock()
+    private var failing = true
+    var isFailing: Bool { get { lock.lock(); defer { lock.unlock() }; return failing } set { lock.lock(); failing = newValue; lock.unlock() } }
+}
+
+extension SessionStoreTests {
+    @MainActor private func failingPrefs(_ toggle: SessionPersistFailSwitch = SessionPersistFailSwitch()) throws -> (failing: LocalPreferencesStore, working: LocalPreferencesStore) {
+        let file = FileManager.default.temporaryDirectory.appendingPathComponent("Joycode-SessionsFail-\(UUID().uuidString)").appendingPathComponent("p.json")
+        let working = LocalPreferencesStore(fileURL: file)
+        try working.save(.default)
+        let failing = LocalPreferencesStore(fileURL: file, replacingItem: { existing, temp in
+            if toggle.isFailing { throw CocoaError(.fileWriteUnknown) }
+            _ = try FileManager.default.replaceItemAt(existing, withItemAt: temp)
+        })
+        return (failing, working)
+    }
+
+    @MainActor private func assertFreshStoreRestoresNothing(_ working: LocalPreferencesStore, file: StaticString = #filePath, line: UInt = #line) {
+        let fresh = makeStore(preferences: working)
+        fresh.restore()
+        XCTAssertEqual(fresh.state, .empty, file: file, line: line)
+        XCTAssertNil(try? working.load().lastSessionID, file: file, line: line)
+    }
+
+    @MainActor func testPersistFailureOnCreateStaysLoadedWithWarning() async throws {
+        let prefs = try failingPrefs()
+        let store = makeStore(preferences: prefs.failing, location: FakeLocationProvider(active: URL(fileURLWithPath: "/work")), create: { [self] request in summary(request.id.rawValue) })
+        XCTAssertNil(store.persistenceProblem)
+        store.create()
+        let loaded = await waitUntil { store.activeSession != nil }
+        XCTAssertTrue(loaded)
+        XCTAssertEqual(store.persistenceProblem, .saveFailed)
+        assertFreshStoreRestoresNothing(prefs.working)
+    }
+
+    @MainActor func testPersistFailureOnLoadStaysLoadedWithWarning() async throws {
+        let prefs = try failingPrefs()
+        let value = summary("ses-9")
+        let store = makeStore(preferences: prefs.failing, get: { _ in value })
+        store.load(value.id)
+        let loaded = await waitUntil { store.state == .loaded(value) }
+        XCTAssertTrue(loaded)
+        XCTAssertEqual(store.persistenceProblem, .saveFailed)
+        assertFreshStoreRestoresNothing(prefs.working)
+    }
+
+    @MainActor func testPersistFailureOnRecoverUnknownCreationStaysLoadedWithWarning() async throws {
+        let prefs = try failingPrefs()
+        let store = makeStore(preferences: prefs.failing, location: FakeLocationProvider(active: URL(fileURLWithPath: "/work")), get: { [self] id in summary(id.rawValue) }, create: { _ in throw SessionAPIError.requestFailed })
+        store.create()
+        let unknown = await waitUntil { if case .creationUnknown = store.state { return true }; return false }
+        XCTAssertTrue(unknown)
+        XCTAssertNil(store.persistenceProblem)
+        store.recoverUnknownCreation()
+        let loaded = await waitUntil { store.activeSession != nil }
+        XCTAssertTrue(loaded)
+        XCTAssertEqual(store.persistenceProblem, .saveFailed)
+        assertFreshStoreRestoresNothing(prefs.working)
+    }
+
+    @MainActor func testLaterSuccessfulPersistClearsWarning() async throws {
+        let toggle = SessionPersistFailSwitch()
+        let prefs = try failingPrefs(toggle)
+        let value = summary("ses-9")
+        let store = makeStore(preferences: prefs.failing, get: { _ in value })
+        store.load(value.id)
+        let warned = await waitUntil { store.persistenceProblem == .saveFailed }
+        XCTAssertTrue(warned)
+        toggle.isFailing = false
+        store.load(value.id)
+        let cleared = await waitUntil { store.persistenceProblem == nil && store.state == .loaded(value) }
+        XCTAssertTrue(cleared)
+        XCTAssertEqual(try prefs.working.load().lastSessionID, value.id)
+    }
+
+    @MainActor func testClearFailureWarnsAndSuccessfulPathsSetNoWarning() async throws {
+        let ok = makeStore(get: { [self] _ in summary("ses-9") })
+        ok.load(SessionID(rawValue: "ses-9"))
+        let loaded = await waitUntil { ok.activeSession != nil }
+        XCTAssertTrue(loaded)
+        XCTAssertNil(ok.persistenceProblem)
+        ok.clear()
+        XCTAssertNil(ok.persistenceProblem)
+
+        let prefs = try failingPrefs()
+        let bad = makeStore(preferences: prefs.failing)
+        bad.clear()
+        XCTAssertEqual(bad.persistenceProblem, .saveFailed)
+        XCTAssertEqual(bad.state, .empty)
+    }
+}

@@ -8,11 +8,6 @@ import SwiftUI
 /// view lifetime. It never builds requests or invents selections.
 struct SelectionView: View {
     @ObservedObject var store: SelectionStore
-    // Retained for source compatibility with production call sites; the view
-    // no longer observes them. Session/location observation lives in the
-    // store binding owned by SelectionComposition.
-    @ObservedObject var sessionStore: ActiveSessionStore
-    @ObservedObject var locationStore: ActiveLocationStore
 
     private var isDiscovering: Bool {
         store.agentDiscovery == .loading || store.modelDiscovery == .loading

@@ -2,8 +2,8 @@ import Foundation
 import Combine
 
 enum SessionComposition {
-    @MainActor static func activeSessionStore(connectionOwner: ServiceConnectionOwner, location: any ActiveLocationProviding, preferences: LocalPreferencesStore) -> ActiveSessionStore {
-        let api = SessionAPI(transport: URLSessionHTTPTransport())
+    @MainActor static func activeSessionStore(connectionOwner: ServiceConnectionOwner, location: any ActiveLocationProviding, preferences: LocalPreferencesStore, transport: any HTTPTransport) -> ActiveSessionStore {
+        let api = SessionAPI(transport: transport)
         let store = ActiveSessionStore(preferences: preferences, location: location, list: { @MainActor @Sendable query in
             guard let context = connectionOwner.currentContext else { throw SessionAPIError.notConnected }
             let envelope = try await api.list(connection: context.connection, query: query)

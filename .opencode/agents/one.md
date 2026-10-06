@@ -1,7 +1,7 @@
 ---
 description: Implements one assigned, bounded slice of the native macOS client
 mode: subagent
-model: opencode-go/muse-spark-1.3-contributor#medium
+model: opencode/muse-spark-1.3-contributor-free
 permissions:
   - action: subagent
     resource: "*"

@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// Transcript presentation for the current session: authoritative snapshots
-/// kept current by the store's event-driven resynchronization (R08).
+/// kept current by the store's tiered live reconciliation (H08).
 ///
 /// Plain SwiftUI scroll of transcript rows backed by `TranscriptStore`:
 /// user/system/synthetic/skill text, assistant text, reasoning in a
@@ -55,8 +55,8 @@ struct TranscriptView: View {
             } else {
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 12) {
-                        ForEach(identifiedMessages) { row in
-                            TranscriptMessageRow(message: row.message)
+                        ForEach(store.presentationRows, id: \.id) { row in
+                            TranscriptMessageRow(row: row)
                         }
                     }
                     .padding()
@@ -65,26 +65,6 @@ struct TranscriptView: View {
             }
         }
         .accessibilityIdentifier("transcript-view")
-    }
-
-    private struct Row: Identifiable {
-        let id: Identity
-        let message: TranscriptMessage
-    }
-
-    private enum Identity: Hashable {
-        case message(String, occurrence: Int)
-        case fallback(Int)
-    }
-
-    private var identifiedMessages: [Row] {
-        var occurrences: [String: Int] = [:]
-        return store.messages.enumerated().map { index, message in
-            guard let id = message.messageID else { return Row(id: .fallback(index), message: message) }
-            let occurrence = occurrences[id, default: 0]
-            occurrences[id] = occurrence + 1
-            return Row(id: .message(id, occurrence: occurrence), message: message)
-        }
     }
 
     /// Never says "Live" without positive stream evidence from the store.
@@ -114,10 +94,10 @@ struct TranscriptView: View {
 }
 
 private struct TranscriptMessageRow: View {
-    let message: TranscriptMessage
+    let row: TranscriptPresentationRow
 
     var body: some View {
-        switch message {
+        switch row.message {
         case .user(let text):
             TranscriptTextRow(label: "You", text: text.text)
         case .system(let text):
@@ -127,7 +107,7 @@ private struct TranscriptMessageRow: View {
         case .skill(let text):
             TranscriptTextRow(label: "Skill", text: text.text)
         case .assistant(let assistant):
-            TranscriptAssistantRow(assistant: assistant)
+            TranscriptAssistantRow(assistant: assistant, contents: row.contents, liveItems: row.liveItems)
         case .agentSwitched(let variant):
             TranscriptRetainedRow(title: "Agent changed", variant: variant)
         case .modelSwitched(let variant):
@@ -167,6 +147,13 @@ private struct TranscriptTextRow: View {
 
 private struct TranscriptAssistantRow: View {
     let assistant: TranscriptAssistantMessage
+    /// Persisted contents with model-supplied identity (stable tool ids,
+    /// snapshot-relative positions for text/reasoning/opaque). Never built
+    /// from live ordinals.
+    let contents: [TranscriptPresentationContent]
+    /// Live overlay items for this assistant, in start order. Supplied by the
+    /// store's overlay publisher.
+    let liveItems: [TranscriptLiveItem]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -193,8 +180,11 @@ private struct TranscriptAssistantRow: View {
                 }
                 .accessibilityIdentifier("transcript-assistant-error")
             }
-            ForEach(Array(assistant.content.enumerated()), id: \.offset) { _, content in
-                TranscriptContentRow(content: content)
+            ForEach(contents, id: \.id) { item in
+                TranscriptContentRow(content: item.content)
+            }
+            ForEach(liveItems, id: \.id) { item in
+                TranscriptLiveItemRow(item: item)
             }
         }
         .accessibilityIdentifier("transcript-row")
@@ -207,14 +197,25 @@ private struct TranscriptContentRow: View {
     var body: some View {
         switch content {
         case .text(let text):
-            Text(text)
-                .textSelection(.enabled)
-        case .reasoning(let text):
-            DisclosureGroup("Reasoning") {
+            // An empty durable `.text("")` is a stream start whose terminal
+            // has not settled yet; it renders nothing so it never duplicates
+            // the live overlay row.
+            if text.isEmpty {
+                EmptyView()
+            } else {
                 Text(text)
                     .textSelection(.enabled)
             }
-            .accessibilityIdentifier("transcript-reasoning")
+        case .reasoning(let text):
+            if text.isEmpty {
+                EmptyView()
+            } else {
+                DisclosureGroup("Reasoning") {
+                    Text(text)
+                        .textSelection(.enabled)
+                }
+                .accessibilityIdentifier("transcript-reasoning")
+            }
         case .tool(let tool):
             TranscriptToolRow(tool: tool)
         case .opaque(let opaque):
@@ -222,6 +223,37 @@ private struct TranscriptContentRow: View {
                 .font(.callout)
                 .foregroundStyle(.secondary)
                 .accessibilityIdentifier("transcript-opaque-content")
+        }
+    }
+}
+
+/// Ephemeral overlay rendering keyed by `LiveContentID` (never by offset).
+/// Supplied by the store's overlay publisher; persisted rendering is
+/// unchanged.
+private struct TranscriptLiveItemRow: View {
+    let item: TranscriptLiveItem
+
+    var body: some View {
+        switch item.id {
+        case .text:
+            Text(item.text)
+                .textSelection(.enabled)
+                .accessibilityIdentifier("transcript-live-text")
+        case .reasoning:
+            DisclosureGroup("Reasoning") {
+                Text(item.text)
+                    .textSelection(.enabled)
+            }
+            .accessibilityIdentifier("transcript-live-reasoning")
+        case .tool:
+            VStack(alignment: .leading, spacing: 2) {
+                Text(item.toolName ?? "Tool")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text(item.text)
+                    .textSelection(.enabled)
+            }
+            .accessibilityIdentifier("transcript-live-tool")
         }
     }
 }

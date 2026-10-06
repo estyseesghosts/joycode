@@ -39,12 +39,12 @@ struct URLSessionEventSource: EventSource, @unchecked Sendable {
 
     func openSubscription(connection: ServiceConnection, request: HTTPRequest) async throws -> Subscription {
         guard request.method == .get, request.body == nil else { throw EventSourceError.invalidRequest("events require GET without a body") }
-        let (urlRequest, url) = try await HTTPRequestBuilder.makeRequest(connection: connection, request: request, timeout: timeout, accept: "text/event-stream")
+        let (urlRequest, _) = try await HTTPRequestBuilder.makeRequest(connection: connection, request: request, timeout: timeout, accept: "text/event-stream")
         let configuration = URLSessionConfiguration.ephemeral
         configuration.protocolClasses = urlProtocolClasses
         configuration.timeoutIntervalForRequest = timeout
         configuration.timeoutIntervalForResource = Self.streamResourceTimeout
-        let session = URLSession(configuration: configuration, delegate: RedirectPolicy(initialURL: url), delegateQueue: nil)
+        let session = URLSession(configuration: configuration, delegate: RedirectPolicy(), delegateQueue: nil)
         do {
             let (bytes, response) = try await session.bytes(for: urlRequest)
             guard let http = response as? HTTPURLResponse else { session.invalidateAndCancel(); throw EventSourceError.invalidResponse }
@@ -59,7 +59,7 @@ struct URLSessionEventSource: EventSource, @unchecked Sendable {
                     var parser = SSEParser(maxLineBytes: maxLineBytes, maxEventBytes: maxEventBytes)
                     do {
                         for try await byte in bytes {
-                            for event in try parser.append(Data([byte])) {
+                            for event in try parser.append(byte) {
                                 if case .dropped = continuation.yield(event) { throw EventSourceError.bufferOverflow }
                             }
                         }

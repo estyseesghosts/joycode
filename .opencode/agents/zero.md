@@ -1,7 +1,7 @@
 ---
 description: Read-only map of this native macOS OpenCode client's code, symbols, callers, and dependency direction.
 mode: subagent
-model: opencode-go/longcat-2.5-preview-free
+model: claude-code/claude-haiku-4-5-20251001
 permissions:
   # Default deny: add only what this role needs.
   - action: "*"

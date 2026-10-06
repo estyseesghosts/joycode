@@ -61,6 +61,21 @@ struct TranscriptAPI: Sendable {
         return HTTPRequest(method: .get, relativePath: "/api/session/\(sessionID.rawValue)/message", queryItems: items)
     }
 
+    /// `GET /api/session/{id}/message/{messageID}` (`200 {data: Session.Message.Info}`,
+    /// no query parameters). Path segments are percent-encoded individually.
+    static func messageRequest(sessionID: SessionID, messageID: String) -> HTTPRequest {
+        HTTPRequest(
+            method: .get,
+            relativePath: "/api/session/\(pathSegment(sessionID.rawValue))/message/\(pathSegment(messageID))"
+        )
+    }
+
+    private static func pathSegment(_ value: String) -> String {
+        var allowed = CharacterSet.urlPathAllowed
+        allowed.remove(charactersIn: "/")
+        return value.addingPercentEncoding(withAllowedCharacters: allowed) ?? value
+    }
+
     /// Client-side validation matching the pinned contract: limits are
     /// 1...200, and `order` cannot coexist with an opaque `cursor`.
     static func validate(_ query: TranscriptQuery) throws {
@@ -84,19 +99,37 @@ struct TranscriptAPI: Sendable {
         } catch let error as TranscriptQueryError {
             throw TranscriptAPIError.invalidQuery(error)
         }
-        return try await send(Self.historyRequest(sessionID: sessionID, query: query), connection: connection)
+        return try await send(Self.historyRequest(sessionID: sessionID, query: query), connection: connection, decode: TranscriptPage.decode)
+    }
+
+    /// Reads one message authoritatively. A `404` surfaces as `notFound`
+    /// (session or message absent), never as `malformedResponse`. A returned
+    /// message whose ID differs from the requested one is a contract
+    /// violation and throws `malformedResponse`.
+    func message(connection: ServiceConnection, sessionID: SessionID, messageID: String) async throws -> TranscriptMessage {
+        let message = try await send(
+            Self.messageRequest(sessionID: sessionID, messageID: messageID),
+            connection: connection,
+            decode: TranscriptMessage.decode(envelope:)
+        )
+        guard message.messageID == messageID else { throw TranscriptAPIError.malformedResponse }
+        return message
     }
 
     // MARK: - Internals
 
-    private func send(_ request: HTTPRequest, connection: ServiceConnection) async throws -> TranscriptPage {
+    private func send<Value>(
+        _ request: HTTPRequest,
+        connection: ServiceConnection,
+        decode: (Data) throws -> Value
+    ) async throws -> Value {
         do {
             let response = try await transport.send(connection: connection, request: request)
             guard response.statusCode == 200 else {
                 throw Self.map(statusCode: response.statusCode)
             }
             do {
-                return try TranscriptPage.decode(response.body)
+                return try decode(response.body)
             } catch {
                 throw TranscriptAPIError.malformedResponse
             }

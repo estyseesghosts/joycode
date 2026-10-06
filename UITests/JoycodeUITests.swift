@@ -1,5 +1,16 @@
 import XCTest
 
+/// UI tests drive the real Joycode.app in a live GUI session.
+///
+/// Environment prerequisite (not fixable in-repo): the Mac must have an
+/// unlocked, awake GUI session with the display on while these tests run.
+/// If the screen is locked or the display is asleep, the app under test
+/// still launches (a fresh process per test, visible in the accessibility
+/// hierarchy as `Application title: 'Joycode'`), but the WindowServer maps
+/// no windows, so every `app.windows` wait fails even though the app itself
+/// is healthy. That signature (app alive, zero windows, fresh pid per test)
+/// means the session, not the app. The test-runner host additionally needs
+/// Accessibility/Automation approval on first run.
 final class JoycodeUITests: XCTestCase {
     func testApplicationLaunchesWithJoycodeWindow() {
         let app = XCUIApplication()

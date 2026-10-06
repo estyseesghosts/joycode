@@ -53,6 +53,82 @@ final class EventSourceTests: XCTestCase {
         }
     }
 
+    func testByteAndDataAPIsProduceIdenticalFrames() throws {
+        let wire = Data(": heartbeat\r\n\r\ndata: {\"id\":\"1\",\"type\":\"server.connected\",\"data\":{}}\r\n\r\ndata: {\"id\":\"2\",\"type\":\"ready\",\"created\":1,\"data\":{}}\n\n".utf8)
+        var viaData = SSEParser()
+        var dataEvents = [EventEnvelope]()
+        var index = wire.startIndex
+        for size in [3, 1, 7, 64] {
+            let end = wire.index(index, offsetBy: size, limitedBy: wire.endIndex) ?? wire.endIndex
+            dataEvents += try viaData.append(Data(wire[index..<end]))
+            index = end
+            if index == wire.endIndex { break }
+        }
+        if index < wire.endIndex {
+            dataEvents += try viaData.append(Data(wire[index...]))
+        }
+        XCTAssertEqual(dataEvents.count, 2)
+
+        var viaByte = SSEParser()
+        var byteEvents = [EventEnvelope]()
+        for byte in wire { byteEvents += try viaByte.append(byte) }
+        XCTAssertEqual(byteEvents, dataEvents)
+    }
+
+    func testFragmentedCRLFSplitAcrossFeeds() throws {
+        let frame = Data("data: {\"id\":\"9\",\"type\":\"ready\",\"created\":1,\"data\":{}}\r\n\r\n".utf8)
+        guard let crIndex = frame.firstIndex(of: 13) else {
+            XCTFail("frame must contain CR"); return
+        }
+        let split = frame.index(after: crIndex)
+
+        var parser = SSEParser()
+        XCTAssertTrue(try parser.append(Data(frame[..<split])).isEmpty)
+        let events = try parser.append(Data(frame[split...]))
+        XCTAssertEqual(events.count, 1)
+        XCTAssertEqual(events.first?.id, "9")
+
+        // Bare CR line ending: CR at end of one append, next starts with CR.
+        var bareCR = SSEParser()
+        XCTAssertTrue(try bareCR.append(Data("data: {\"id\":\"10\",\"type\":\"ready\",\"created\":1,\"data\":{}}\r".utf8)).isEmpty)
+        let bareEvents = try bareCR.append(Data("\r\n".utf8))
+        XCTAssertEqual(bareEvents.count, 1)
+        XCTAssertEqual(bareEvents.first?.id, "10")
+
+        // Pure single-byte feeding of \r\n sequences matches chunked feeding.
+        var single = SSEParser()
+        var singleEvents = [EventEnvelope]()
+        for byte in frame { singleEvents += try single.append(byte) }
+        XCTAssertEqual(singleEvents, events)
+    }
+
+    func testLargeSingleByteFedPayloadParses() throws {
+        let padding = String(repeating: "a", count: 8000)
+        let wire = Data("data: {\"id\":\"big\",\"type\":\"ready\",\"created\":1,\"data\":{\"pad\":\"\(padding)\"}}\n\n".utf8)
+        var parser = SSEParser()
+        var events = [EventEnvelope]()
+        for byte in wire { events += try parser.append(byte) }
+        XCTAssertEqual(events.count, 1)
+        XCTAssertEqual(events.first?.id, "big")
+        XCTAssertEqual(events.first?.type, "ready")
+    }
+
+    func testByteAPIEnforcesLineAndEventLimits() throws {
+        var lineParser = SSEParser(maxLineBytes: 8)
+        var lineError: SSEParserError?
+        for byte in Data("data: 0123456789\n".utf8) {
+            do { _ = try lineParser.append(byte) } catch let error as SSEParserError { lineError = error; break }
+        }
+        XCTAssertEqual(lineError, .lineTooLarge)
+
+        var eventParser = SSEParser(maxEventBytes: 20)
+        var eventError: SSEParserError?
+        for byte in Data("data: {\"id\":\"1\",\"type\":\"x\",\"created\":1,\"data\":{}}\n\n".utf8) {
+            do { _ = try eventParser.append(byte) } catch let error as SSEParserError { eventError = error; break }
+        }
+        XCTAssertEqual(eventError, .eventTooLarge)
+    }
+
     func testEventSourceBuildsAuthenticatedSSERequestAndParsesEvent() async throws {
         EventSourceURLProtocol.handler = { request in
             XCTAssertEqual(request.httpMethod, "GET")

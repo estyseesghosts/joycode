@@ -14,13 +14,24 @@ struct SSEParser: Sendable {
         self.maxLineBytes = maxLineBytes; self.maxEventBytes = maxEventBytes
     }
 
+    mutating func append(_ byte: UInt8) throws -> [EventEnvelope] {
+        var result = [EventEnvelope]()
+        if pendingCR {
+            pendingCR = false
+            if byte == 10 { try finishLine(&result); return result }
+            try finishLine(&result)
+        }
+        if byte == 13 { pendingCR = true }
+        else if byte == 10 { try finishLine(&result) }
+        else { line.append(byte); if line.count > maxLineBytes { throw SSEParserError.lineTooLarge } }
+        return result
+    }
+
     mutating func append(_ bytes: Data) throws -> [EventEnvelope] {
         var result = [EventEnvelope]()
+        result.reserveCapacity(4)
         for byte in bytes {
-            if pendingCR { pendingCR = false; if byte == 10 { try finishLine(&result); continue }; try finishLine(&result) }
-            if byte == 13 { pendingCR = true }
-            else if byte == 10 { try finishLine(&result) }
-            else { line.append(byte); if line.count > maxLineBytes { throw SSEParserError.lineTooLarge } }
+            result += try append(byte)
         }
         return result
     }

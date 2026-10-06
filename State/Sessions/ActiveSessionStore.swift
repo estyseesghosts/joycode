@@ -6,10 +6,14 @@ extension ActiveLocationStore: ActiveLocationProviding {}
 
 private enum SessionLoadOrigin { case explicit, restore }
 
+enum SessionPersistenceProblem: Equatable, Sendable { case saveFailed }
+
 @MainActor final class ActiveSessionStore: ObservableObject {
     @Published private(set) var state: ActiveSessionState = .empty
     @Published private(set) var roots: [SessionSummary] = []
     @Published private(set) var renameState: SessionRenameState = .idle
+    /// Non-fatal overlay: the session is active now but was not saved for restart.
+    @Published private(set) var persistenceProblem: SessionPersistenceProblem?
     var activeSession: SessionSummary? { if case .loaded(let value) = state { return value }; return nil }
 
     /// Retained here so composition can own the connection subscription without
@@ -291,7 +295,7 @@ private enum SessionLoadOrigin { case explicit, restore }
                 // cannot be adopted as a fact in the new connection context.
                 guard self.sameConnection(connectionAttempt) else { self.state = .creationUnknown(id); return }
                 guard value.id == id else { self.state = .creationUnknown(id); return }
-                try? self.persist(id); self.publishActive(value)
+                self.recordPersistence { try self.persist(id) }; self.publishActive(value)
             }
             catch is CancellationError {
                 guard self.createGeneration == attempt else { return }
@@ -321,13 +325,13 @@ private enum SessionLoadOrigin { case explicit, restore }
                 guard self.loadGeneration == attempt else { return }
                 guard self.sameConnection(connectionAttempt) else { return }
                 guard value.id == id else { return }
-                try? self.persist(id); self.publishActive(value)
+                self.recordPersistence { try self.persist(id) }; self.publishActive(value)
             }
             catch is CancellationError {} catch let error as SessionAPIError { guard self.loadGeneration == attempt else { return }; guard self.sameConnection(connectionAttempt) else { return }; if case .notFound = error { state = .empty } }
             catch {}
         }
     }
-    func clear() { loadGeneration &+= 1; loadTask?.cancel(); loadTask = nil; rootsGeneration &+= 1; rootsTask?.cancel(); rootsTask = nil; renameGeneration &+= 1; renameOperation?.cancel(); renameOperation = nil; renameState = .idle; createGeneration &+= 1; createOperation?.cancel(); createOperation = nil; pendingRestoreID = nil; restoreInFlightID = nil; hasRestored = true; try? clearPreference(); state = .empty }
+    func clear() { loadGeneration &+= 1; loadTask?.cancel(); loadTask = nil; rootsGeneration &+= 1; rootsTask?.cancel(); rootsTask = nil; renameGeneration &+= 1; renameOperation?.cancel(); renameOperation = nil; renameState = .idle; createGeneration &+= 1; createOperation?.cancel(); createOperation = nil; pendingRestoreID = nil; restoreInFlightID = nil; hasRestored = true; recordPersistence { try clearPreference() }; state = .empty }
 
     private func beginLoad(_ id: SessionID, origin: SessionLoadOrigin) {
         guard !renameIsInFlight else { return }
@@ -358,7 +362,7 @@ private enum SessionLoadOrigin { case explicit, restore }
                     return
                 }
                 if origin == .restore { self.restoreInFlightID = nil; self.pendingRestoreID = nil }
-                try? self.persist(id); self.publishActive(value)
+                self.recordPersistence { try self.persist(id) }; self.publishActive(value)
             }
             catch is CancellationError {
                 guard self.loadGeneration == attempt else { return }
@@ -383,7 +387,7 @@ private enum SessionLoadOrigin { case explicit, restore }
             handleStaleConnectionRead(id: id, origin: origin, prior: prior)
             return
         }
-        if case .notFound = error { pendingRestoreID = nil; try? clearPreference(); state = .empty; return }
+        if case .notFound = error { pendingRestoreID = nil; recordPersistence { try clearPreference() }; state = .empty; return }
         state = .failed(Self.problem(error))
         if origin == .restore, error == .notConnected { pendingRestoreID = id }
     }
@@ -423,6 +427,11 @@ private enum SessionLoadOrigin { case explicit, restore }
 
     private func sameConnection(_ captured: UInt64?) -> Bool { connectionGeneration() == captured }
     private func persist(_ id: SessionID) throws { var p = try preferences.load(); p.lastSessionID = id; try preferences.save(p) }
+    /// Runs one restart-affecting write and records its outcome. Failure only
+    /// sets the warning; `state` and backend facts are never touched.
+    private func recordPersistence(_ write: () throws -> Void) {
+        do { try write(); persistenceProblem = nil } catch { persistenceProblem = .saveFailed }
+    }
     private func clearPreference() throws { var p = try preferences.load(); p.lastSessionID = nil; try preferences.save(p) }
     private func publishActive(_ value: SessionSummary) {
         state = .loaded(value)

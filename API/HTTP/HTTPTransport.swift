@@ -13,25 +13,43 @@ enum HTTPTransportError: Error, Sendable, Equatable {
 }
 
 /// Foundation URLSession transport for the frozen, V2-agnostic HTTP contracts.
-struct URLSessionHTTPTransport: HTTPTransport, @unchecked Sendable {
-    var timeout: TimeInterval
-    private var urlProtocolClasses: [AnyClass]
+///
+/// The transport owns a single URLSession for its lifetime. Sessions are
+/// application-scoped: JoycodeApp constructs one production transport and
+/// composition forwards it, so sequential requests never construct sessions.
+final class URLSessionHTTPTransport: HTTPTransport, @unchecked Sendable {
+    let timeout: TimeInterval
+    private let session: URLSession
+    private let redirectDelegate: RedirectPolicy
 
-    init(timeout: TimeInterval = 30, urlProtocolClasses: [AnyClass] = []) {
+    init(
+        timeout: TimeInterval = 30,
+        urlProtocolClasses: [AnyClass] = [],
+        sessionFactory: (@Sendable (URLSessionConfiguration, URLSessionDelegate?) -> URLSession)? = nil
+    ) {
         self.timeout = timeout
-        self.urlProtocolClasses = urlProtocolClasses
-    }
-
-    func send(connection: ServiceConnection, request: HTTPRequest) async throws -> HTTPResponse {
-        let (urlRequest, url) = try await HTTPRequestBuilder.makeRequest(connection: connection, request: request, timeout: timeout)
-
-        let delegate = RedirectPolicy(initialURL: url)
+        let redirectDelegate = RedirectPolicy()
+        self.redirectDelegate = redirectDelegate
         let configuration = URLSessionConfiguration.ephemeral
         configuration.protocolClasses = urlProtocolClasses
         configuration.timeoutIntervalForRequest = timeout
         configuration.timeoutIntervalForResource = timeout
-        let session = URLSession(configuration: configuration, delegate: delegate, delegateQueue: nil)
-        defer { session.invalidateAndCancel() }
+        configuration.httpShouldSetCookies = false
+        configuration.httpCookieAcceptPolicy = .never
+        configuration.httpCookieStorage = nil
+        configuration.urlCache = nil
+        configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
+        if let sessionFactory {
+            self.session = sessionFactory(configuration, redirectDelegate)
+        } else {
+            self.session = URLSession(configuration: configuration, delegate: redirectDelegate, delegateQueue: nil)
+        }
+    }
+
+    deinit { session.invalidateAndCancel() }
+
+    func send(connection: ServiceConnection, request: HTTPRequest) async throws -> HTTPResponse {
+        let (urlRequest, _) = try await HTTPRequestBuilder.makeRequest(connection: connection, request: request, timeout: timeout)
 
         do {
             let (data, response) = try await session.data(for: urlRequest)
@@ -76,13 +94,11 @@ struct URLSessionHTTPTransport: HTTPTransport, @unchecked Sendable {
 /// Redirects are deliberately never followed. OpenCode credentials must not be
 /// sent to a location selected by an HTTP response.
 enum HTTPRedirectPolicy {
-    static func shouldFollow(from: URL, to: URL) -> Bool { false }
+    static func shouldFollow() -> Bool { false }
 }
 
 final class RedirectPolicy: NSObject, URLSessionTaskDelegate, @unchecked Sendable {
-    let initialURL: URL
-
-    init(initialURL: URL) { self.initialURL = initialURL }
+    override init() { super.init() }
 
     func urlSession(
         _ session: URLSession,
@@ -94,10 +110,8 @@ final class RedirectPolicy: NSObject, URLSessionTaskDelegate, @unchecked Sendabl
         // Do not follow even same-origin redirects: the response is mapped to
         // redirectRejected by the transport rather than exposing a redirect as
         // a successful response or risking credential leakage.
-        let shouldFollow = request.url.map {
-            HTTPRedirectPolicy.shouldFollow(from: initialURL, to: $0)
-        } ?? false
-        completionHandler(shouldFollow ? request : nil)
+        _ = HTTPRedirectPolicy.shouldFollow()
+        completionHandler(nil)
     }
 }
 

@@ -315,3 +315,99 @@ private struct TestCredentials: CredentialCapability {
     var safeDescription: String { "test" }
     func credential(for connection: ConnectionID) async throws -> ServiceCredential? { nil }
 }
+
+private final class PersistFailSwitch: @unchecked Sendable {
+    private let lock = NSLock()
+    private var failing = true
+    var isFailing: Bool { get { lock.lock(); defer { lock.unlock() }; return failing } set { lock.lock(); failing = newValue; lock.unlock() } }
+}
+
+extension ProjectPickerTests {
+    private func failingPrefs(_ toggle: PersistFailSwitch = PersistFailSwitch(), seed: LocalPreferences = .default) throws -> (failing: LocalPreferencesStore, working: LocalPreferencesStore) {
+        let file = temporaryDirectory("persist").appendingPathComponent("p.json")
+        let working = LocalPreferencesStore(fileURL: file)
+        try working.save(seed)
+        let failing = LocalPreferencesStore(fileURL: file, replacingItem: { existing, temp in
+            if toggle.isFailing { throw CocoaError(.fileWriteUnknown) }
+            _ = try FileManager.default.replaceItemAt(existing, withItemAt: temp)
+        })
+        return (failing, working)
+    }
+
+    @MainActor
+    func testSaveFailureOnSelectWarnsButStillResolvesAndIsNotRestored() async throws {
+        let dir = temporaryDirectory("sel")
+        let value = resolvedLocation(directory: dir)
+        let prefs = try failingPrefs()
+        let store = makeStore(prefs: prefs.failing) { _ in .directory } resolve: { _ in value }
+        XCTAssertNil(store.persistenceProblem)
+        store.select(dir)
+        XCTAssertEqual(store.persistenceProblem, .saveFailed)
+        let resolved = await waitUntil { store.state == .resolved(value) }
+        XCTAssertTrue(resolved)
+        XCTAssertEqual(store.persistenceProblem, .saveFailed)
+
+        let fresh = makeStore(prefs: prefs.working) { _ in .directory } resolve: { _ in value }
+        fresh.restore()
+        XCTAssertEqual(fresh.state, .empty)
+    }
+
+    @MainActor
+    func testSaveFailureOnClearWarnsAndStaleDirectoryStillRestores() async throws {
+        let dir = temporaryDirectory("clr")
+        let value = resolvedLocation(directory: dir)
+        let prefs = try failingPrefs(seed: LocalPreferences(selectedDirectory: dir))
+        let store = makeStore(prefs: prefs.failing) { _ in .directory } resolve: { _ in value }
+        store.restore()
+        let resolved = await waitUntil { store.state == .resolved(value) }
+        XCTAssertTrue(resolved)
+        store.clear()
+        XCTAssertEqual(store.state, .empty)
+        XCTAssertEqual(store.persistenceProblem, .saveFailed)
+
+        let fresh = makeStore(prefs: prefs.working) { _ in .directory } resolve: { _ in value }
+        fresh.restore()
+        guard case .resolving(let restored) = fresh.state else { return XCTFail("expected stale directory to restore, got \(fresh.state)") }
+        XCTAssertEqual(restored.path, dir.path)
+    }
+
+    @MainActor
+    func testLaterSuccessfulSaveClearsWarningAndRetryResavesSelection() async throws {
+        let dir = temporaryDirectory("retry")
+        let value = resolvedLocation(directory: dir)
+        let toggle = PersistFailSwitch()
+        let prefs = try failingPrefs(toggle)
+        let store = makeStore(prefs: prefs.failing) { _ in .directory } resolve: { _ in value }
+        store.select(dir)
+        XCTAssertEqual(store.persistenceProblem, .saveFailed)
+        toggle.isFailing = false
+        store.retry()
+        XCTAssertNil(store.persistenceProblem)
+        XCTAssertEqual(try prefs.working.load().selectedDirectory?.path, dir.path)
+        let resolved = await waitUntil { store.state == .resolved(value) }
+        XCTAssertTrue(resolved)
+    }
+
+    @MainActor
+    func testSuccessfulSelectAndClearSetNoWarning() throws {
+        let dir = temporaryDirectory("ok")
+        let value = resolvedLocation(directory: dir)
+        let store = makeStore(prefs: LocalPreferencesStore(baseDirectory: temporaryDirectory("okprefs"))) { _ in .directory } resolve: { _ in value }
+        store.select(dir); XCTAssertNil(store.persistenceProblem)
+        store.clear(); XCTAssertNil(store.persistenceProblem)
+    }
+
+    @MainActor
+    func testUnreadablePrefsOnSelectWarnsButSelectionProceeds() async throws {
+        let dir = temporaryDirectory("bad")
+        let value = resolvedLocation(directory: dir)
+        let file = temporaryDirectory("badprefs").appendingPathComponent("p.json")
+        try Data("not-json".utf8).write(to: file)
+        let store = makeStore(prefs: LocalPreferencesStore(fileURL: file)) { _ in .directory } resolve: { _ in value }
+        store.select(dir)
+        XCTAssertEqual(store.persistenceProblem, .loadFailed)
+        let resolved = await waitUntil { store.state == .resolved(value) }
+        XCTAssertTrue(resolved)
+        XCTAssertEqual(try Data(contentsOf: file), Data("not-json".utf8))
+    }
+}
